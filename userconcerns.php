@@ -9,14 +9,6 @@ if (!isset($_SESSION['username'])) {
     exit();
 }
 
-// Ensure session consistency for change_password.php
-if (!isset($_SESSION['accountID']) && isset($_SESSION['user_id'])) {
-    $_SESSION['accountID'] = $_SESSION['user_id'];
-}
-if (!isset($_SESSION['user_id']) && isset($_SESSION['accountID'])) {
-    $_SESSION['user_id'] = $_SESSION['accountID'];
-}
-
 // Set username and display name
 $username = $_SESSION['username'];
 $name = $_SESSION['name'] ?? $username;
@@ -49,9 +41,11 @@ if ($openConcernId) {
     $stmt->close();
 }
 
-// Fetch concerns for the logged-in user (excluding Completed and Cancelled) - REMOVED EquipmentFacilities JOIN
+// FIXED: Fetch concerns for the logged-in user with correct field names
 $stmt = $conn->prepare(
-    "SELECT c.* 
+    "SELECT c.ConcernID, c.Concern_Title, c.Description, c.building_name, c.Room, 
+            c.Service_type, c.EFname, c.Attachment, c.Concern_Date, 
+            c.Assigned_to, c.Status 
      FROM Concerns c 
      WHERE c.AccountID = ? 
      AND c.Status NOT IN ('Completed', 'Cancelled') 
@@ -178,7 +172,6 @@ $stmt->close();
             color: white;
             background: transparent;
             border: none;
-            /* FIXED: Better touch target */
             min-height: 44px;
         }
 
@@ -216,38 +209,6 @@ $stmt->close();
             background: #f1f1f1;
         }
 
-        /* Main Content - FIXED for mobile */
-        .main {
-            padding: 10px;
-            /* FIXED: Prevent overflow */
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        .submit-btn-top {
-            background: linear-gradient(90deg,#163a37,#1f9158);
-            color: white;
-            font-weight: bold;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            transition: 0.3s;
-            font-size: 14px;
-            text-decoration: none;
-            display: inline-block;
-            /* FIXED: Better touch target */
-            min-height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .submit-btn-top:hover {
-            background: linear-gradient(90deg,#1f9158,#163a37);
-            transform: translateY(-1px);
-            color: white;
-        }
-
         /* Concern Container - FIXED for mobile */
         .concern-container {
             background: white;
@@ -255,15 +216,16 @@ $stmt->close();
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             width: 100%;
+            max-width: 1000px;
             margin: 0 auto;
             max-height: 70vh;
+            margin-top: 25px;
             overflow-y: auto;
-            /* FIXED: Better mobile sizing */
             box-sizing: border-box;
         }
 
         .concern-header {
-            background: linear-gradient(90deg,#163a37,#1f9158);
+            background: linear-gradient(135deg, #087830, #3c4142);
             color: white;
             font-weight: bold;
             padding: 12px;
@@ -283,7 +245,7 @@ $stmt->close();
 
         /* FIXED: Better accordion buttons for touch */
         .accordion-button {
-            background: linear-gradient(90deg,#163a37,#1f9158);
+            background: linear-gradient(135deg, #087830, #3c4142);
             color: white;
             font-weight: bold;
             border: none;
@@ -296,7 +258,7 @@ $stmt->close();
         }
 
         .accordion-button:not(.collapsed) {
-            background: linear-gradient(90deg,#1f9158,#163a37);
+            background: linear-gradient(135deg, #087830, #3c4142);
         }
 
         .accordion-body {
@@ -351,13 +313,13 @@ $stmt->close();
 
         /* Enhanced highlight styles for auto-opened concerns */
         .accordion-item.highlighted {
-            background-color: #e8f5e8 !important;
-            border-left: 4px solid #1f9158 !important;
+            background-color: #e8f5e8;
+            border-left: 4px solid #1f9158;
             transition: all 0.3s ease;
         }
 
         .accordion-item.highlighted .accordion-button {
-            background: linear-gradient(90deg, #1f9158, #163a37) !important;
+            background: linear-gradient(90deg, #1f9158, #163a37);
         }
 
         /* Smooth transitions for accordion */
@@ -367,8 +329,8 @@ $stmt->close();
 
         /* Anchor highlight styles */
         .accordion-item:target {
-            background-color: #e8f5e8 !important;
-            border-left: 4px solid #1f9158 !important;
+            background-color: #e8f5e8;
+            border-left: 4px solid #1f9158;
             animation: highlight 2s ease;
         }
 
@@ -472,12 +434,6 @@ $stmt->close();
             
             .form-field .form-control {
                 font-size: 16px; /* FIXED: Prevent zoom on iOS */
-            }
-            
-            .submit-btn-top {
-                width: 100%;
-                margin-bottom: 15px;
-                font-size: 15px;
             }
             
             .status-badge {
@@ -590,14 +546,6 @@ $stmt->close();
     </div>
 </div>
 
-<!-- Main Content -->
-<div class="main">
-    <div class="d-flex justify-content-end mb-3">
-        <a href="usersubmit.php" class="submit-btn-top">
-            <i class="fas fa-plus me-1"></i> Submit New Concern
-        </a>
-    </div>
-
     <div class="concern-container">
         <div class="concern-header">Your Submitted Concerns</div>
         <div class="accordion" id="concernsAccordion">
@@ -621,6 +569,7 @@ $stmt->close();
                                     aria-controls="concern<?= $index ?>">
                                 <span class="d-flex justify-content-between w-100 align-items-center flex-wrap">
                                     <span class="me-2" style="font-size: 13px;"><?= $date ?></span>
+                                    <span class="me-2" style="font-size: 20px;"><?= htmlspecialchars($row['Concern_Title']) ?></span>
                                     <span class="badge <?= $statusClass ?> status-badge"><?= htmlspecialchars($status) ?></span>
                                 </span>
                             </button>
@@ -639,7 +588,7 @@ $stmt->close();
                                     <div class="form-control"><?= htmlspecialchars($row['Description']) ?></div>
                                 </div>
 
-                                <!-- Room and Equipment/Facility in same row -->
+                                <!-- Room and Building in same row -->
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-field">
@@ -649,26 +598,29 @@ $stmt->close();
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-field">
-                                            <label>Equipment / Facility</label>
+                                            <label>Building</label>
                                             <div class="form-control">
-                                                <?= !empty($row['EquipmentType']) ? htmlspecialchars($row['EquipmentType']) : 'Not specified' ?>
+                                                <!-- FIXED: Use building_name from database -->
+                                                <?= !empty($row['building_name']) ? htmlspecialchars($row['building_name']) : 'Not specified' ?>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Problem Type and Priority in same row -->
+                                <!-- Service Type and Equipment/Facility in same row -->
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-field">
-                                            <label>Problem Type</label>
-                                            <div class="form-control"><?= htmlspecialchars($row['Problem_Type']) ?></div>
+                                            <label>Service Type</label>
+                                            <div class="form-control"><?= htmlspecialchars($row['Service_type']) ?></div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-field">
-                                            <label>Priority</label>
-                                            <div class="form-control"><?= htmlspecialchars($row['Priority']) ?></div>
+                                            <label>Equipment / Facility</label>
+                                            <div class="form-control">
+                                                <?= !empty($row['EFname']) ? htmlspecialchars($row['EFname']) : 'Not specified' ?>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -676,14 +628,25 @@ $stmt->close();
                                 <!-- Assigned To -->
                                 <div class="form-field">
                                     <label>Assigned To</label>
-                                    <div class="form-control"><?= htmlspecialchars($row['Assigned_to']) ?></div>
+                                    <div class="form-control"><?= !empty($row['Assigned_to']) ? htmlspecialchars($row['Assigned_to']) : 'Not assigned yet' ?></div>
                                 </div>
                                 
                                 <?php if (!empty($row['Attachment'])): ?>
                                 <!-- Attachment -->
                                 <div class="form-field">
                                     <label>Attachment</label>
-                                    <div class="form-control"><?= htmlspecialchars($row['Attachment']) ?></div>
+                                    <div class="form-control">
+                                        <?php 
+                                        $attachment = htmlspecialchars($row['Attachment']);
+                                        if (preg_match('/\.(jpg|jpeg|png|gif|bmp)$/i', $attachment)): 
+                                        ?>
+                                            <a href="<?= $attachment ?>" target="_blank" class="text-decoration-none">
+                                                <i class="fas fa-image me-1"></i>View Image
+                                            </a>
+                                        <?php else: ?>
+                                            <?= $attachment ?>
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
                                 <?php endif; ?>
                             </div>

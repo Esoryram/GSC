@@ -11,6 +11,9 @@ $username = $_SESSION['username'];
 $name = isset($_SESSION['name']) ? $_SESSION['name'] : $username;
 $activePage = "system_data";
 
+// Get current active tab from session or default to 'rooms'
+$activeTab = isset($_SESSION['active_data_tab']) ? $_SESSION['active_data_tab'] : 'rooms';
+
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['action'])) {
@@ -122,10 +125,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Fetch data for display
-$rooms = $conn->query("SELECT * FROM rooms ORDER BY id DESC");
-$equipment = $conn->query("SELECT * FROM equipmentfacility ORDER BY EFID DESC");
-$personnel = $conn->query("SELECT * FROM personnels ORDER BY PersonnelId DESC");
-$services = $conn->query("SELECT * FROM services ORDER BY serviceID DESC");
+$rooms = $conn->query("SELECT * FROM rooms ORDER BY RoomID ASC");
+$equipment = $conn->query("SELECT * FROM equipmentfacility ORDER BY EFID ASC");
+$personnel = $conn->query("SELECT * FROM personnels ORDER BY PersonnelId ASC");
+$services = $conn->query("SELECT * FROM services ORDER BY serviceID ASC");
 ?>
 
 <!DOCTYPE html>
@@ -338,6 +341,9 @@ $services = $conn->query("SELECT * FROM services ORDER BY serviceID DESC");
         </div>
     </div>
 
+    <!-- Include Change Password Modal -->
+    <?php include('change_password_modal.php'); ?>
+
     <div class="container mt-4">
         <h2 class="mb-4"><i class="fas fa-database me-2"></i>System Data Management</h2>
         
@@ -390,19 +396,19 @@ $services = $conn->query("SELECT * FROM services ORDER BY serviceID DESC");
                         <tbody>
                             <?php while($row = $rooms->fetch_assoc()): ?>
                             <tr>
-                                <td><?php echo $row['id']; ?></td>
+                                <td><?php echo $row['RoomID']; ?></td>
                                 <td><?php echo htmlspecialchars($row['roomname']); ?></td>
                                 <td><?php echo htmlspecialchars($row['building_name']); ?></td>
                                 <td><?php echo $row['date_added']; ?></td>
                                 <td><?php echo $row['last_updated']; ?></td>
                                 <td>
                                     <button class="btn btn-sm btn-warning edit-room" 
-                                            data-id="<?php echo $row['id']; ?>"
+                                            data-id="<?php echo $row['RoomID']; ?>"
                                             data-roomname="<?php echo htmlspecialchars($row['roomname']); ?>"
                                             data-building="<?php echo htmlspecialchars($row['building_name']); ?>">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-danger delete-room" data-id="<?php echo $row['id']; ?>">
+                                    <button class="btn btn-sm btn-danger delete-room" data-id="<?php echo $row['RoomID']; ?>">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </td>
@@ -522,17 +528,17 @@ $services = $conn->query("SELECT * FROM services ORDER BY serviceID DESC");
                         <tbody>
                             <?php while($row = $services->fetch_assoc()): ?>
                             <tr>
-                                <td><?php echo $row['serviceID']; ?></td>
+                                <td><?php echo $row['ServiceID']; ?></td>
                                 <td><?php echo htmlspecialchars($row['Service_type']); ?></td>
                                 <td><?php echo $row['date_added']; ?></td>
                                 <td><?php echo $row['last_updated']; ?></td>
                                 <td>
                                     <button class="btn btn-sm btn-warning edit-service" 
-                                            data-id="<?php echo $row['serviceID']; ?>"
+                                            data-id="<?php echo $row['ServiceID']; ?>"
                                             data-name="<?php echo htmlspecialchars($row['Service_type']); ?>">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-danger delete-service" data-id="<?php echo $row['serviceID']; ?>">
+                                    <button class="btn btn-sm btn-danger delete-service" data-id="<?php echo $row['ServiceID']; ?>">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </td>

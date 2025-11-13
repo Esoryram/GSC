@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['feedback_id'], $_POST
 
     if (!empty($response)) {
         $stmt = $conn->prepare(
-            "UPDATE Feedback SET Admin_Response = ?, Date_Responded = NOW() WHERE FeedbackID = ?"
+            "UPDATE feedbacks SET Admin_Response = ?, Date_Responded = NOW() WHERE FeedbackID = ?"
         );
         $stmt->bind_param("si", $response, $feedback_id);
         
@@ -187,8 +187,6 @@ body {
                         <th>User</th>
                         <th>Concern Title</th>
                         <th>Description</th>
-                        <th>Room</th>
-                        <th>Problem Type</th>
                         <th>User Comments</th>
                         <th>Date Submitted</th>
                         <th>Admin Response</th>
@@ -203,10 +201,8 @@ body {
                                 <td><?= htmlspecialchars($row['Name'] ?? $row['Username']) ?></td>
                                 <td><?= htmlspecialchars($row['Concern_Title']) ?></td>
                                 <td><?= htmlspecialchars($row['Description']) ?></td>
-                                <td><?= htmlspecialchars($row['Room'] ?? 'N/A') ?></td>
-                                <td><?= htmlspecialchars($row['Service_type']) ?></td>
                                 <td><?= htmlspecialchars($row['Comments']) ?></td>
-                                <td><?= date('M d, Y h:i A', strtotime($row['Date_Submitted'])) ?></td>
+                                <td><?= date('M d, Y', strtotime($row['Date_Submitted'])) ?></td>
                                 <td>
                                     <?php if (!empty($row['Admin_Response'])): ?>
                                         <?= nl2br(htmlspecialchars($row['Admin_Response'])) ?>
@@ -253,7 +249,7 @@ body {
                         <?php endwhile; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="11" class="text-center py-4">
+                            <td colspan="8" class="text-center py-4">
                                 <i class="fas fa-inbox fa-2x text-muted mb-2"></i><br>
                                 No feedback available
                             </td>

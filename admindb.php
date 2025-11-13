@@ -10,8 +10,8 @@ $username = $_SESSION['username'];
 $name = isset($_SESSION['name']) ? $_SESSION['name'] : $username;
 $activePage = "dashboard";
 
-// Total concerns
-$totalQuery = "SELECT COUNT(*) AS total FROM Concerns";
+// FIXED: Total concerns (excluding Completed and Cancelled)
+$totalQuery = "SELECT COUNT(*) AS total FROM Concerns WHERE Status NOT IN ('Completed', 'Cancelled')";
 $totalResult = mysqli_query($conn, $totalQuery);
 $totalRow = mysqli_fetch_assoc($totalResult);
 $total = $totalRow['total'] ?? 0;
@@ -28,7 +28,7 @@ $inProgressResult = mysqli_query($conn, $inProgressQuery);
 $inProgressRow = mysqli_fetch_assoc($inProgressResult);
 $inProgress = $inProgressRow['inProgress'] ?? 0;
 
-// Fetch recent concerns
+// FIXED: Recent concerns (excluding Completed and Cancelled)
 $recentConcernsQuery = "
     SELECT 
         c.ConcernID, 
@@ -37,11 +37,11 @@ $recentConcernsQuery = "
         c.Service_type, 
         c.Concern_Date,
         c.Status, 
-        c.Assigned_to, 
-        a.Username AS ReportedBy
+        a.Name AS ReportedBy
     FROM Concerns c
     LEFT JOIN Accounts a ON c.AccountID = a.AccountID
-    ORDER BY c.ConcernID DESC
+    WHERE c.Status NOT IN ('Completed', 'Cancelled')
+    ORDER BY c.ConcernID ASC
     LIMIT 3
 ";
 $recentResult = mysqli_query($conn, $recentConcernsQuery);
@@ -438,7 +438,7 @@ $announcementsResult = mysqli_query($conn, $announcementsQuery);
                 <div class="dashboard-card card-total">
                     <div class="card-icon"><i class="fas fa-boxes"></i></div>
                     <h1 class="card-value"><?php echo $total; ?></h1>
-                    <p class="card-label">Total Concerns</p>
+                    <p class="card-label">Active Concerns</p>
                 </div>
 
                 <div class="dashboard-card card-pending">
@@ -488,7 +488,7 @@ $announcementsResult = mysqli_query($conn, $announcementsQuery);
 
         <!-- Recent Concerns -->
         <div class="recent-concerns-panel">
-            <h4>Recent Concerns</h4>
+            <h4>Recent Active Concerns</h4>
 
             <div class="table-responsive mt-2">
                 <table class="table table-striped table-hover align-middle">
@@ -497,11 +497,10 @@ $announcementsResult = mysqli_query($conn, $announcementsQuery);
                             <th>ID</th>
                             <th>Title</th>
                             <th>Room</th>
-                            <th>Type</th>
+                            <th>Service Type</th>
                             <th>Date</th>
                             <th>Status</th>
                             <th>Reported By</th>
-                            <th>Assigned To</th>
                         </tr>
                     </thead>
 
@@ -517,7 +516,6 @@ $announcementsResult = mysqli_query($conn, $announcementsQuery);
                                     <td>" . htmlspecialchars(date('M d, Y', strtotime($row['Concern_Date']))) . "</td>
                                     <td>" . htmlspecialchars($row['Status']) . "</td>
                                     <td>" . htmlspecialchars($row['ReportedBy']) . "</td>
-                                    <td>" . htmlspecialchars($row['Assigned_to']) . "</td>
                                 </tr>";
                             }
                         } else {

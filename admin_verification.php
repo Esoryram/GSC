@@ -3,7 +3,7 @@ session_start();
 include("config.php");
 
 // Check if admin is logged in
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+if (!isset($_SESSION['account_id']) || $_SESSION['role'] !== 'admin') {
     header("Location: admin_login.php");
     exit();
 }

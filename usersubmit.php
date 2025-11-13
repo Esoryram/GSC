@@ -1,3 +1,19 @@
+<?php
+session_start();
+include("config.php");
+
+// Check if user is logged in
+if (!isset($_SESSION['username'])) {
+    header("Location: user_login.php");
+    exit();
+}
+
+// Fetch data from database
+$buildings = $conn->query("SELECT DISTINCT building_name FROM rooms ORDER BY building_name");
+$services = $conn->query("SELECT * FROM services ORDER BY Service_type");
+$equipment = $conn->query("SELECT * FROM equipmentfacility ORDER BY EFname");
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -69,6 +85,7 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             padding: 25px;
             margin: 0 auto 30px;
+            margin-top: 25px;
             max-width: 850px;
             width: 100%;
             box-sizing: border-box;
@@ -152,7 +169,7 @@
             border-bottom: none;
         }
 
-        /* Equipment Dropdown Checklist - REMOVED EXTRA SCROLLBAR */
+        /* Equipment Dropdown Checklist */
         .equipment-dropdown {
             position: relative;
             user-select: none;
@@ -185,21 +202,15 @@
             z-index: 99;
             width: 100%;
             max-height: 200px;
-            overflow-y: auto; /* Only one scrollbar here */
+            overflow-y: auto;
             display: none;
-            padding: 0; /* Remove padding to prevent double scrollbar */
-        }
-
-        /* Remove the nested equipment-checklist scrollbar */
-        .equipment-dropdown .equipment-checklist {
-            background: white;
-            /* Remove max-height and overflow-y to prevent double scrollbar */
+            padding: 0;
         }
 
         .equipment-dropdown .form-check {
             margin-bottom: 0;
-            margin-left: 20px; /* Reduce margin to fit more items */
-            padding: 10px 12px; /* Consistent padding */
+            margin-left: 20px;
+            padding: 10px 12px;
             border-bottom: 1px solid #f8f9fa;
             transition: background-color 0.2s;
         }
@@ -255,6 +266,20 @@
         /* File Input */
         .form-control[type="file"] {
             padding: 8px;
+        }
+
+        /* Disabled state for room select */
+        .custom-select.disabled .select-selected {
+            background-color: #f8f9fa;
+            color: #6c757d;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        /* Alert Messages */
+        .alert {
+            margin: 15px;
+            border-radius: 8px;
         }
 
         /* Mobile Responsive */
@@ -364,6 +389,25 @@
 </head>
 <body>
 
+<!-- Display Success/Error Messages -->
+<?php if (isset($_SESSION['success'])): ?>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        <?= $_SESSION['success'] ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <?php unset($_SESSION['success']); ?>
+<?php endif; ?>
+
+<?php if (isset($_SESSION['error'])): ?>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <?= $_SESSION['error'] ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <?php unset($_SESSION['error']); ?>
+<?php endif; ?>
+
 <!-- Navbar -->
 <div class="navbar">
     <div class="logo">
@@ -383,30 +427,48 @@
 
             <!-- Concern Title -->
             <div class="mb-3">
-                <label for="title" class="form-label">Concern Title</label>
-                <input type="text" class="form-control" id="title" name="title" required>
+                <label for="title" class="form-label">Concern Title <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="title" name="title" required 
+                       placeholder="Enter a brief title for your concern">
             </div>
 
             <!-- Description -->
             <div class="mb-3">
-                <label for="description" class="form-label">Description</label>
-                <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                <label for="description" class="form-label">Description <span class="text-danger">*</span></label>
+                <textarea class="form-control" id="description" name="description" rows="3" required 
+                          placeholder="Describe your concern in detail"></textarea>
             </div>
 
             <div class="row">
+                <!-- Building selection -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Building <span class="text-danger">*</span></label>
+                    <div class="custom-select" id="buildingSelect">
+                        <div class="select-selected placeholder">Select a building</div>
+                        <div class="select-items">
+                            <?php while($building = $buildings->fetch_assoc()): ?>
+                                <div data-value="<?php echo htmlspecialchars($building['building_name']); ?>">
+                                    <?php echo htmlspecialchars($building['building_name']); ?>
+                                </div>
+                            <?php endwhile; ?>
+                            <div data-value="Other">Other</div>
+                        </div>
+                    </div>
+                    <input type="hidden" name="building" id="buildingInput" required>
+
+                    <!-- Other building input -->
+                    <div class="other-container" id="otherBuildingContainer">
+                        <input type="text" id="other_building" name="other_building" placeholder="Enter building name">
+                    </div>
+                </div>
+
                 <!-- Room selection -->
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">Room</label>
-                    <div class="custom-select" id="roomSelect">
-                        <div class="select-selected placeholder">Select a room</div>
-                        <div class="select-items">
-                            <div data-value="LS 211">LS 211</div>
-                            <div data-value="LS 212">LS 212</div>
-                            <div data-value="LS 213">LS 213</div>
-                            <div data-value="SB 311">SB 311</div>
-                            <div data-value="SB 312">SB 312</div>
-                            <div data-value="SB 313">SB 313</div>
-                            <div data-value="Other">Other</div>
+                    <label class="form-label">Room <span class="text-danger">*</span></label>
+                    <div class="custom-select disabled" id="roomSelect">
+                        <div class="select-selected placeholder">Select a building first</div>
+                        <div class="select-items" id="roomOptions">
+                            <!-- Rooms will be populated dynamically based on building selection -->
                         </div>
                     </div>
                     <input type="hidden" name="room" id="roomInput" required>
@@ -416,61 +478,49 @@
                         <input type="text" id="other_room" name="other_room" placeholder="Enter room name">
                     </div>
                 </div>
+            </div>
+
+            <div class="row">
+                <!-- Service Type selection -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Service Type <span class="text-danger">*</span></label>
+                    <div class="custom-select" id="serviceSelect">
+                        <div class="select-selected placeholder">Select service type</div>
+                        <div class="select-items">
+                            <?php while($service = $services->fetch_assoc()): ?>
+                                <div data-value="<?php echo htmlspecialchars($service['Service_type']); ?>">
+                                    <?php echo htmlspecialchars($service['Service_type']); ?>
+                                </div>
+                            <?php endwhile; ?>
+                            <div data-value="Other">Other</div>
+                        </div>
+                    </div>
+                    <input type="hidden" name="Service_type" id="serviceInput" required>
+
+                    <!-- Other service input -->
+                    <div class="other-container" id="otherServiceContainer">
+                        <input type="text" id="other_service" name="other_service" placeholder="Enter service type">
+                    </div>
+                </div>
 
                 <!-- Equipment / Facility selection - Dropdown checklist -->
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">Equipment / Facility</label>
+                    <label class="form-label">Equipment / Facility <span class="text-danger">*</span></label>
                     <div class="equipment-dropdown" id="equipmentSelect">
                         <div class="select-selected placeholder">Select equipment/facility</div>
                         <div class="select-items">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="equipment[]" value="Air Conditioner" id="equip1">
-                                <label class="form-check-label" for="equip1">Air Conditioner</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="equipment[]" value="Electric Fan" id="equip2">
-                                <label class="form-check-label" for="equip2">Electric Fan</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="equipment[]" value="Chair" id="equip3">
-                                <label class="form-check-label" for="equip3">Chair</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="equipment[]" value="Lights" id="equip4">
-                                <label class="form-check-label" for="equip4">Lights</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="equipment[]" value="Outlet" id="equip5">
-                                <label class="form-check-label" for="equip5">Outlet</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="equipment[]" value="Projector" id="equip6">
-                                <label class="form-check-label" for="equip6">Projector</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="equipment[]" value="Whiteboard" id="equip7">
-                                <label class="form-check-label" for="equip7">Whiteboard</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="equipment[]" value="Table" id="equip8">
-                                <label class="form-check-label" for="equip8">Table</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="equipment[]" value="Computer" id="equip9">
-                                <label class="form-check-label" for="equip9">Computer</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="equipment[]" value="Printer" id="equip10">
-                                <label class="form-check-label" for="equip10">Printer</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="equipment[]" value="Window" id="equip11">
-                                <label class="form-check-label" for="equip11">Window</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="equipment[]" value="Door" id="equip12">
-                                <label class="form-check-label" for="equip12">Door</label>
-                            </div>
+                            <?php 
+                            // Reset pointer and fetch equipment again
+                            $equipment->data_seek(0);
+                            while($equip = $equipment->fetch_assoc()): 
+                            ?>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="equipment[]" value="<?php echo htmlspecialchars($equip['EFname']); ?>" id="equip_<?php echo $equip['EFID']; ?>">
+                                    <label class="form-check-label" for="equip_<?php echo $equip['EFID']; ?>">
+                                        <?php echo htmlspecialchars($equip['EFname']); ?>
+                                    </label>
+                                </div>
+                            <?php endwhile; ?>
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" name="equipment[]" value="Other" id="equipOther">
                                 <label class="form-check-label" for="equipOther">Other</label>
@@ -488,45 +538,10 @@
                 </div>
             </div>
 
-            <div class="row">
-                <!-- Problem Type selection -->
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Problem Type</label>
-                    <div class="custom-select" id="problemSelect">
-                        <div class="select-selected placeholder">Select problem type</div>
-                        <div class="select-items">
-                            <div data-value="Carpentry">Carpentry</div>
-                            <div data-value="Masonry">Masonry</div>
-                            <div data-value="Electrical">Electrical</div>
-                            <div data-value="Plumbing">Plumbing</div>
-                            <div data-value="Painting">Painting</div>
-                            <div data-value="Fabrication">Fabrication</div>
-                            <div data-value="Appliance Repair/Installation">Appliance Repair/Installation</div>
-                        </div>
-                    </div>
-                    <input type="hidden" name="problem_type" id="problemInput" required>
-                </div>
-
-                <!-- Priority selection -->
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Priority</label>
-                    <div class="custom-select" id="prioritySelect">
-                        <div class="select-selected placeholder">Select priority</div>
-                        <div class="select-items">
-                            <div data-value="Low">Low</div>
-                            <div data-value="Medium">Medium</div>
-                            <div data-value="High">High</div>
-                            <div data-value="Urgent">Urgent</div>
-                        </div>
-                    </div>
-                    <input type="hidden" name="priority" id="priorityInput" required>
-                </div>
-            </div>
-
             <!-- File attachment -->
             <div class="mb-3">
-                <label for="attachment" class="form-label">Attachment (Photo/Video)</label>
-                <input type="file" class="form-control" id="attachment" name="attachment" accept=".jpg,.png,.gif,.mp4,.mov" required>
+                <label for="attachment" class="form-label">Attachment (Photo/Video) <span class="text-danger">*</span></label>
+                <input type="file" class="form-control" id="attachment" name="attachment" accept=".jpg,.jpeg,.png,.gif,.mp4,.mov" required>
                 <small class="text-muted">Max file size: 5MB. Allowed types: JPG, PNG, GIF, MP4, MOV.</small>
             </div>
 
@@ -538,8 +553,10 @@
     </div>
 </div>
 
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
-// Store the referrer URL when the page loads
 document.addEventListener('DOMContentLoaded', function() {
     // Get the referrer (previous page)
     const referrer = document.referrer;
@@ -559,128 +576,242 @@ document.addEventListener('DOMContentLoaded', function() {
         // Fallback to userconcerns.php if no referrer is available
         returnButton.href = 'userconcerns.php';
     }
+
+    // Initialize all dropdowns
+    initializeDropdowns();
 });
 
-// Function to close all dropdowns except the specified one
-function closeAllDropdowns(exceptSelectId = null) {
-    const allSelects = ['roomSelect', 'equipmentSelect', 'problemSelect', 'prioritySelect'];
+function initializeDropdowns() {
+    // Initialize Building Select
+    const buildingSelect = document.getElementById('buildingSelect');
+    const buildingSelected = buildingSelect.querySelector('.select-selected');
+    const buildingItems = buildingSelect.querySelector('.select-items');
+    const buildingInput = document.getElementById('buildingInput');
+    const otherBuildingContainer = document.getElementById('otherBuildingContainer');
+
+    buildingSelected.addEventListener('click', function(e) {
+        e.stopPropagation();
+        closeAllDropdowns();
+        buildingItems.style.display = buildingItems.style.display === 'block' ? 'none' : 'block';
+    });
+
+    buildingItems.querySelectorAll('div').forEach(option => {
+        option.addEventListener('click', function() {
+            buildingSelected.textContent = this.textContent;
+            buildingSelected.classList.remove('placeholder');
+            buildingInput.value = this.getAttribute('data-value');
+            buildingItems.style.display = 'none';
+
+            if (this.getAttribute('data-value') === 'Other') {
+                otherBuildingContainer.style.height = '44px';
+                otherBuildingContainer.querySelector('input').required = true;
+            } else {
+                otherBuildingContainer.style.height = '0';
+                const input = otherBuildingContainer.querySelector('input');
+                input.required = false;
+                input.value = '';
+            }
+
+            // Load rooms for the selected building
+            loadRoomsForBuilding(this.getAttribute('data-value'));
+        });
+    });
+
+    // Initialize Service Select
+    const serviceSelect = document.getElementById('serviceSelect');
+    const serviceSelected = serviceSelect.querySelector('.select-selected');
+    const serviceItems = serviceSelect.querySelector('.select-items');
+    const serviceInput = document.getElementById('serviceInput');
+    const otherServiceContainer = document.getElementById('otherServiceContainer');
+
+    serviceSelected.addEventListener('click', function(e) {
+        e.stopPropagation();
+        closeAllDropdowns();
+        serviceItems.style.display = serviceItems.style.display === 'block' ? 'none' : 'block';
+    });
+
+    serviceItems.querySelectorAll('div').forEach(option => {
+        option.addEventListener('click', function() {
+            serviceSelected.textContent = this.textContent;
+            serviceSelected.classList.remove('placeholder');
+            serviceInput.value = this.getAttribute('data-value');
+            serviceItems.style.display = 'none';
+
+            if (this.getAttribute('data-value') === 'Other') {
+                otherServiceContainer.style.height = '44px';
+                otherServiceContainer.querySelector('input').required = true;
+            } else {
+                otherServiceContainer.style.height = '0';
+                const input = otherServiceContainer.querySelector('input');
+                input.required = false;
+                input.value = '';
+            }
+        });
+    });
+
+    // Initialize Equipment Dropdown
+    const equipmentSelect = document.getElementById('equipmentSelect');
+    const equipmentSelected = equipmentSelect.querySelector('.select-selected');
+    const equipmentItems = equipmentSelect.querySelector('.select-items');
+    const otherEquipmentContainer = document.getElementById('otherEquipmentContainer');
+    const otherEquipmentInput = document.getElementById('other_equipment');
+    const selectedEquipmentDisplay = document.getElementById('selectedEquipment');
+
+    equipmentSelected.addEventListener('click', function(e) {
+        e.stopPropagation();
+        closeAllDropdowns();
+        equipmentItems.style.display = equipmentItems.style.display === 'block' ? 'none' : 'block';
+    });
+
+    // Update selected equipment display
+    function updateSelectedEquipment() {
+        const checkboxes = document.querySelectorAll('input[name="equipment[]"]:checked');
+        const selectedValues = Array.from(checkboxes).map(cb => {
+            if (cb.value === 'Other') {
+                const otherInput = document.getElementById('other_equipment');
+                return otherInput.value ? otherInput.value : 'Other';
+            }
+            return cb.value;
+        });
+        
+        if (selectedValues.length > 0) {
+            selectedEquipmentDisplay.textContent = 'Selected: ' + selectedValues.join(', ');
+            equipmentSelected.textContent = selectedValues.length + ' item(s) selected';
+            equipmentSelected.classList.remove('placeholder');
+        } else {
+            selectedEquipmentDisplay.textContent = '';
+            equipmentSelected.textContent = 'Select equipment/facility';
+            equipmentSelected.classList.add('placeholder');
+        }
+    }
+
+    // Add event listeners to all equipment checkboxes
+    document.querySelectorAll('input[name="equipment[]"]').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            if (this.value === 'Other') {
+                if (this.checked) {
+                    otherEquipmentContainer.style.height = '44px';
+                    otherEquipmentInput.required = true;
+                } else {
+                    otherEquipmentContainer.style.height = '0';
+                    otherEquipmentInput.required = false;
+                    otherEquipmentInput.value = '';
+                }
+            }
+            updateSelectedEquipment();
+        });
+    });
+
+    // Also update when other equipment input changes
+    otherEquipmentInput.addEventListener('input', updateSelectedEquipment);
+}
+
+// Load rooms for selected building
+function loadRoomsForBuilding(buildingName) {
+    const roomSelect = document.getElementById('roomSelect');
+    const roomSelected = roomSelect.querySelector('.select-selected');
+    const roomItems = document.getElementById('roomOptions');
+    const roomInput = document.getElementById('roomInput');
+    
+    // Enable room select
+    roomSelect.classList.remove('disabled');
+    roomSelected.textContent = 'Loading rooms...';
+
+    if (buildingName === 'Other') {
+        // For "Other" building, show only "Other" option
+        roomItems.innerHTML = '<div data-value="Other">Other</div>';
+        initializeRoomSelect();
+        roomSelected.textContent = 'Select a room';
+        roomSelected.classList.add('placeholder');
+        return;
+    }
+
+    // AJAX call to get rooms for the selected building
+    fetch('get_rooms.php?building=' + encodeURIComponent(buildingName))
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            roomItems.innerHTML = '';
+            if (data.length > 0) {
+                data.forEach(room => {
+                    const option = document.createElement('div');
+                    option.textContent = room.roomname;
+                    option.setAttribute('data-value', room.roomname);
+                    roomItems.appendChild(option);
+                });
+            }
+            // Always add "Other" option
+            roomItems.innerHTML += '<div data-value="Other">Other</div>';
+            initializeRoomSelect();
+            roomSelected.textContent = 'Select a room';
+            roomSelected.classList.add('placeholder');
+        })
+        .catch(error => {
+            console.error('Error loading rooms:', error);
+            roomItems.innerHTML = '<div data-value="Other">Other</div>';
+            initializeRoomSelect();
+            roomSelected.textContent = 'Select a room';
+            roomSelected.classList.add('placeholder');
+        });
+}
+
+// Initialize room select after loading rooms
+function initializeRoomSelect() {
+    const roomSelect = document.getElementById('roomSelect');
+    const roomSelected = roomSelect.querySelector('.select-selected');
+    const roomItems = document.getElementById('roomOptions');
+    const roomInput = document.getElementById('roomInput');
+    const otherRoomContainer = document.getElementById('otherRoomContainer');
+
+    roomSelected.addEventListener('click', function(e) {
+        e.stopPropagation();
+        closeAllDropdowns();
+        roomItems.style.display = roomItems.style.display === 'block' ? 'none' : 'block';
+    });
+
+    roomItems.querySelectorAll('div').forEach(option => {
+        option.addEventListener('click', function() {
+            roomSelected.textContent = this.textContent;
+            roomSelected.classList.remove('placeholder');
+            roomInput.value = this.getAttribute('data-value');
+            roomItems.style.display = 'none';
+
+            if (this.getAttribute('data-value') === 'Other') {
+                otherRoomContainer.style.height = '44px';
+                otherRoomContainer.querySelector('input').required = true;
+            } else {
+                otherRoomContainer.style.height = '0';
+                const input = otherRoomContainer.querySelector('input');
+                input.required = false;
+                input.value = '';
+            }
+        });
+    });
+}
+
+// Function to close all dropdowns
+function closeAllDropdowns() {
+    const allSelects = ['buildingSelect', 'roomSelect', 'serviceSelect', 'equipmentSelect'];
     
     allSelects.forEach(selectId => {
-        if (selectId !== exceptSelectId) {
-            const select = document.getElementById(selectId);
-            if (select) {
-                const items = select.querySelector('.select-items');
-                if (items) {
-                    items.style.display = 'none';
-                }
-            }
-        }
-    });
-}
-
-// Custom select functionality
-function initCustomSelect(selectId, hiddenInputId, otherContainerId) {
-    const select = document.getElementById(selectId);
-    const selected = select.querySelector('.select-selected');
-    const items = select.querySelector('.select-items');
-    const hiddenInput = hiddenInputId ? document.getElementById(hiddenInputId) : null;
-    const otherContainer = otherContainerId ? document.getElementById(otherContainerId) : null;
-
-    selected.addEventListener('click', (e) => {
-        e.stopPropagation();
-        
-        // Close all other dropdowns first
-        closeAllDropdowns(selectId);
-        
-        // Toggle current dropdown
-        items.style.display = items.style.display === 'block' ? 'none' : 'block';
-    });
-
-    // For equipment dropdown, we don't have individual options to click
-    if (selectId !== 'equipmentSelect') {
-        const options = items.querySelectorAll('div');
-        options.forEach(option => {
-            option.addEventListener('click', () => {
-                selected.textContent = option.textContent;
-                selected.classList.remove('placeholder');
-                if (hiddenInput) hiddenInput.value = option.dataset.value;
+        const select = document.getElementById(selectId);
+        if (select) {
+            const items = select.querySelector('.select-items');
+            if (items) {
                 items.style.display = 'none';
-
-                if (option.dataset.value === 'Other' && otherContainer) {
-                    otherContainer.style.height = '44px';
-                    otherContainer.querySelector('input').required = true;
-                } else if (otherContainer) {
-                    otherContainer.style.height = '0';
-                    const input = otherContainer.querySelector('input');
-                    input.required = false;
-                    input.value = '';
-                }
-            });
-        });
-    }
-
-    // Close dropdown when clicking elsewhere
-    document.addEventListener('click', (e) => {
-        if (!select.contains(e.target)) {
-            items.style.display = 'none';
-        }
-    });
-}
-
-// Initialize all custom selects
-initCustomSelect('roomSelect', 'roomInput', 'otherRoomContainer');
-initCustomSelect('equipmentSelect');
-initCustomSelect('problemSelect', 'problemInput');
-initCustomSelect('prioritySelect', 'priorityInput');
-
-// Equipment checklist functionality
-const equipOtherCheckbox = document.getElementById('equipOther');
-const otherEquipmentContainer = document.getElementById('otherEquipmentContainer');
-const otherEquipmentInput = document.getElementById('other_equipment');
-const selectedEquipmentDisplay = document.getElementById('selectedEquipment');
-const equipmentSelected = document.querySelector('#equipmentSelect .select-selected');
-
-// Update selected equipment display
-function updateSelectedEquipment() {
-    const checkboxes = document.querySelectorAll('input[name="equipment[]"]:checked');
-    const selectedValues = Array.from(checkboxes).map(cb => cb.value);
-    
-    if (selectedValues.length > 0) {
-        selectedEquipmentDisplay.textContent = 'Selected: ' + selectedValues.join(', ');
-        equipmentSelected.textContent = selectedValues.length + ' item(s) selected';
-        equipmentSelected.classList.remove('placeholder');
-    } else {
-        selectedEquipmentDisplay.textContent = '';
-        equipmentSelected.textContent = 'Select equipment/facility';
-        equipmentSelected.classList.add('placeholder');
-    }
-}
-
-// Add event listeners to all equipment checkboxes
-document.querySelectorAll('input[name="equipment[]"]').forEach(checkbox => {
-    checkbox.addEventListener('change', function() {
-        if (this.value === 'Other') {
-            if (this.checked) {
-                otherEquipmentContainer.style.height = '44px';
-                otherEquipmentInput.required = true;
-            } else {
-                otherEquipmentContainer.style.height = '0';
-                otherEquipmentInput.required = false;
-                otherEquipmentInput.value = '';
             }
         }
-        updateSelectedEquipment();
     });
-});
+}
 
-// Close dropdowns when clicking on form inputs
+// Close dropdowns when clicking elsewhere
 document.addEventListener('click', function(e) {
-    // If clicking on any form input that's not a custom select, close all dropdowns
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-        const isCustomSelect = e.target.closest('.custom-select') || e.target.closest('.equipment-dropdown');
-        if (!isCustomSelect) {
-            closeAllDropdowns();
-        }
+    if (!e.target.closest('.custom-select') && !e.target.closest('.equipment-dropdown')) {
+        closeAllDropdowns();
     }
 });
 
@@ -701,7 +832,7 @@ form.addEventListener('submit', function(e) {
     });
 
     // Validate dropdown selections
-    ['roomInput','problemInput','priorityInput'].forEach(id => {
+    ['buildingInput','roomInput','serviceInput'].forEach(id => {
         const input = document.getElementById(id);
         const customSelect = input.previousElementSibling || input.parentElement.querySelector('.select-selected');
         if (!input.value) {

@@ -7,27 +7,40 @@ if (!isset($_SESSION['username'])) {
     exit();
 }
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $id = $_POST['AnnouncementID'];
-    $title = $_POST['title'];
-    $content = $_POST['content'];
-    $start = $_POST['start_date'];
-    $end = $_POST['end_date'];
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $title = trim($_POST['title']);
+    $content = trim($_POST['content']);
+    $start_date = $_POST['start_date'] ?? date('Y-m-d');
+    $end_date = !empty($_POST['end_date']) ? $_POST['end_date'] : null;
 
-    $sql = "UPDATE Announcements 
-            SET title=?, content=?, start_date=?, end_date=? 
-            WHERE AnnouncementID=?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ssssi", $title, $content, $start, $end, $id);
+    // Get the logged-in user's AccountID
+    $username = $_SESSION['username'];
+    $stmt = $conn->prepare("SELECT AccountID FROM accounts WHERE Username = ?");
+    $stmt->bind_param("s", $username);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    $user = $res->fetch_assoc();
+    $accountID = $user['AccountID'] ?? null;
 
-    if ($stmt->execute()) {
-        $_SESSION['alert_type'] = 'success';
-        $_SESSION['alert_message'] = 'Announcement updated successfully!';
+    // Insert into announcements
+    if ($title && $content && $accountID) {
+        $insert = $conn->prepare("
+            INSERT INTO announcements (title, content, AccountID, start_date, end_date, is_active)
+            VALUES (?, ?, ?, ?, ?, 1)
+        ");
+        $insert->bind_param("ssiss", $title, $content, $accountID, $start_date, $end_date);
+
+        if ($insert->execute()) {
+            $_SESSION['alert_type'] = 'success';
+            $_SESSION['alert_message'] = 'Announcement posted successfully!';
+        } else {
+            $_SESSION['alert_type'] = 'error';
+            $_SESSION['alert_message'] = 'Error posting announcement.';
+        }
     } else {
         $_SESSION['alert_type'] = 'error';
-        $_SESSION['alert_message'] = 'Error updating announcement.';
+        $_SESSION['alert_message'] = 'Please fill out all required fields.';
     }
-    $stmt->close();
     
     header("Location: adminannouncement.php");
     exit();

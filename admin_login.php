@@ -30,17 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 // Check if user is admin
                 if ($user['Role'] == 'admin') {
                     // Password is correct and role is admin, set session variables
-                    // Try different possible ID column names
-                    if (isset($user['ID'])) {
-                        $_SESSION['user_id'] = $user['ID'];
-                    } elseif (isset($user['AccountID'])) {
-                        $_SESSION['user_id'] = $user['AccountID'];
-                    } elseif (isset($user['id'])) {
-                        $_SESSION['user_id'] = $user['id'];
-                    } else {
-                        $_SESSION['user_id'] = 1; // Fallback
-                    }
-                    
+                    $_SESSION['account_id'] = $user['AccountID']; // Use only AccountID
                     $_SESSION['username'] = $user['Username'];
                     $_SESSION['name'] = $user['Name'];
                     $_SESSION['role'] = $user['Role'];
@@ -246,7 +236,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         .page-title {
             color: #AED14F;
-            fontsize: 1.8rem;
+            font-size: 1.8rem;
             font-weight: 600;
             margin-bottom: 5px;
         }

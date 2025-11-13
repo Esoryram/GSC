@@ -9,33 +9,24 @@ if (!isset($_SESSION['username'])) {
     exit();
 }
 
-// Ensure session consistency for change_password.php
-if (!isset($_SESSION['accountID']) && isset($_SESSION['user_id'])) {
-    $_SESSION['accountID'] = $_SESSION['user_id'];
-}
-if (!isset($_SESSION['user_id']) && isset($_SESSION['accountID'])) {
-    $_SESSION['user_id'] = $_SESSION['accountID'];
-}
-
 // Get the logged-in username and display name
 $username = $_SESSION['username'];
 $name = isset($_SESSION['name']) ? $_SESSION['name'] : $username;
 $activePage = "dashboard";
 
 // Fetch AccountID from session or database
-$accountID = $_SESSION['accountID'] ?? $_SESSION['user_id'] ?? null;
+$accountID = $_SESSION['account_id'] ?? null;
 
 if (!$accountID) {
     // Query database to get AccountID for the current user
-    $stmt = $conn->prepare("SELECT AccountID FROM Accounts WHERE Username = ?");
+    $stmt = $conn->prepare("SELECT AccountID FROM accounts WHERE Username = ?");
     $stmt->bind_param("s", $username);
     $stmt->execute();
     $result = $stmt->get_result();
 
     if ($row = $result->fetch_assoc()) {
         $accountID = $row['AccountID'];
-        $_SESSION['accountID'] = $accountID;
-        $_SESSION['user_id'] = $accountID; // Set both for compatibility
+        $_SESSION['account_id'] = $accountID;
     } else {
         // Handle error - user not found
         header("Location: user_login.php");
@@ -53,10 +44,10 @@ $completed = 0;
 if ($accountID) {
     // Define queries for total and status-specific concerns
     $queries = [
-        "total"      => "SELECT COUNT(*) AS total FROM Concerns WHERE AccountID = ?",
-        "pending"    => "SELECT COUNT(*) AS pending FROM Concerns WHERE AccountID = ? AND Status = 'Pending'",
-        "inProgress" => "SELECT COUNT(*) AS inProgress FROM Concerns WHERE AccountID = ? AND Status = 'In Progress'",
-        "completed"   => "SELECT COUNT(*) AS completed FROM Concerns WHERE AccountID = ? AND Status = 'Completed'"
+        "total"      => "SELECT COUNT(*) AS total FROM concerns WHERE AccountID = ?",
+        "pending"    => "SELECT COUNT(*) AS pending FROM concerns WHERE AccountID = ? AND Status = 'Pending'",
+        "inProgress" => "SELECT COUNT(*) AS inProgress FROM concerns WHERE AccountID = ? AND Status = 'In Progress'",
+        "completed"   => "SELECT COUNT(*) AS completed FROM concerns WHERE AccountID = ? AND Status = 'Completed'"
     ];
 
     // Execute each query and store results in corresponding variable
@@ -71,15 +62,14 @@ if ($accountID) {
         $stmt->close();
     }
 
-    // Fetch recent concerns (Pending or In Progress) for display
+    // Fetch recent concerns (ALL statuses including Completed) for display
     $recentConcerns = [];
     
+    // FIXED: Only select the fields we need to display
     $stmt = $conn->prepare("
-    SELECT ConcernID, Concern_Title, Room, Status, Assigned_To,
-           DATE_FORMAT(Concern_Date, '%b %d, %Y') AS DateSubmittedFormatted
-    FROM Concerns
+    SELECT ConcernID, Concern_Title, Room, Service_type, Status, Concern_Date
+    FROM concerns
     WHERE AccountID = ? 
-      AND Status IN ('Pending', 'In Progress')
     ORDER BY Concern_Date DESC
     LIMIT 5");
     
@@ -691,10 +681,9 @@ if ($accountID) {
                             <th scope="col">ID</th>
                             <th scope="col">Title</th>
                             <th scope="col">Room/Area</th>
+                            <th scope="col">Service Type</th>
                             <th scope="col">Date Submitted</th>
-                            <th scope="col">Assigned To</th>
                             <th scope="col">Status</th>
-                            <th scope="col">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -703,8 +692,8 @@ if ($accountID) {
                                 <td><?= htmlspecialchars($concern['ConcernID']) ?></td>
                                 <td class="fw-bold"><?= htmlspecialchars($concern['Concern_Title']) ?></td>
                                 <td><?= htmlspecialchars($concern['Room']) ?></td>
-                                <td><?= htmlspecialchars($concern['DateSubmittedFormatted']) ?></td>
-                                <td><?= htmlspecialchars($concern['Assigned_To']) ?></td>
+                                <td><?= htmlspecialchars($concern['Service_type']) ?></td>
+                                <td><?= date('M d, Y', strtotime($concern['Concern_Date'])) ?></td>
                                 <td>
                                     <?php
                                     $status = htmlspecialchars($concern['Status']);
@@ -766,16 +755,26 @@ if ($accountID) {
                 document.body.style.overflow = '';
             }
         });
+
+        // Load announcements
+        loadAnnouncements();
+        // Refresh announcements every 30 seconds
+        setInterval(loadAnnouncements, 30000);
     });
 
     function loadAnnouncements() {
         fetch('get_announcement.php')
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
             .then(announcements => {
                 const container = document.getElementById('announcementsContainer');
                 container.innerHTML = '';
 
-                if (!announcements.length) {
+                if (!announcements || !announcements.length) {
                     container.innerHTML = '<div class="announcement-item text-muted">No active announcements.</div>';
                     return;
                 }
@@ -791,7 +790,8 @@ if ($accountID) {
                     container.appendChild(btn);
                 });
             })
-            .catch(() => {
+            .catch((error) => {
+                console.error('Error loading announcements:', error);
                 document.getElementById('announcementsContainer').innerHTML =
                     '<div class="announcement-item text-danger">Error loading announcements.</div>';
             });
@@ -804,15 +804,12 @@ if ($accountID) {
         modalTitle.textContent = a.title;
         modalBody.innerHTML = `
             <p class="text-muted" style="font-size:12px;">Posted on ${a.date}</p>
-            <div style="white-space:pre-line;">${a.details}</div>
+            <div style="white-space:pre-line;">${a.details || a.content || 'No details available.'}</div>
         `;
 
         const modal = new bootstrap.Modal(document.getElementById('announcementModal'));
         modal.show();
     }
-
-    loadAnnouncements();
-    setInterval(loadAnnouncements, 30000);
 </script>
 
 <!-- Announcement Modal -->
