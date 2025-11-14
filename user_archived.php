@@ -56,13 +56,16 @@ $userRow = $userResult->fetch_assoc();
 $accountID = $userRow ? $userRow['AccountID'] : 0;
 $stmt->close();
 
-// Fetch completed or cancelled concerns
-$concernsQuery = "SELECT ConcernID, Concern_Title, Description, building_name, Room, Service_type, EFname, Assigned_to, Attachment, Status, Concern_Date 
-                  FROM concerns 
-                  WHERE AccountID = ? AND (Status = 'Completed' OR Status = 'Cancelled') 
-                  ORDER BY Concern_Date DESC";
+// Fetch completed or cancelled concerns with feedback status
+$concernsQuery = "SELECT c.ConcernID, c.Concern_Title, c.Description, c.building_name, c.Room, 
+                         c.Service_type, c.EFname, c.Assigned_to, c.Attachment, c.Status, c.Concern_Date,
+                         f.FeedbackID, f.Comments as FeedbackComments, f.Date_Submitted as FeedbackDate
+                  FROM concerns c 
+                  LEFT JOIN feedbacks f ON c.ConcernID = f.ConcernID AND f.AccountID = ?
+                  WHERE c.AccountID = ? AND (c.Status = 'Completed' OR c.Status = 'Cancelled') 
+                  ORDER BY c.Concern_Date DESC";
 $stmt2 = $conn->prepare($concernsQuery);
-$stmt2->bind_param("i", $accountID);
+$stmt2->bind_param("ii", $accountID, $accountID);
 $stmt2->execute();
 $concernsResult = $stmt2->get_result();
 $stmt2->close();
@@ -82,7 +85,8 @@ body {
     margin: 0;
     font-family: 'Poppins', sans-serif;
     font-weight: 600;
-    background: #f4f4f4;
+    background: #f9fafb;
+    overflow-x: hidden;
 }
 
 /* Navbar */
@@ -90,10 +94,12 @@ body {
     display: flex;
     align-items: center;
     background: linear-gradient(135deg, #087830, #3c4142);
-    padding: 15px 15px;
+    padding: 12px 15px;
     color: white;
     box-shadow: 0 4px 6px rgba(0,0,0,0.3);
     position: relative;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .logo {
@@ -130,64 +136,58 @@ body {
 }
 .return-btn:hover {
     background: #07532e;
+    color: white;
 }
 
-/* Concern Box */
+/* Concern Container */
 .concern-container {
     background: white;
-    padding: 15px;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    max-width: 850px;
-    margin: 0 auto;
-    max-height: 550px;
-    overflow-y: auto;
+    padding: 25px;
+    margin: 0 auto 30px;
     margin-top: 25px;
+    max-width: 850px;
+    width: 100%;
+    box-sizing: border-box;
+    max-height: 70vh;
+    overflow-y: auto;
 }
 
 .concern-header {
-    background: linear-gradient(90deg, #163a37, #1f9158);
+    background: linear-gradient(135deg, #087830, #3c4142);
     color: white;
     font-weight: bold;
-    padding: 8px;
+    padding: 12px;
     border-radius: 10px;
-    font-size: 18px;
-    margin-bottom: 20px;
+    font-size: 16px;
+    margin-bottom: 15px;
     text-align: center;
 }
 
-/* Accordion */
+/* Accordion - Consistent with userconcerns.php */
 .accordion-item {
     border: 1px solid #dee2e6;
     border-radius: 8px;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     overflow: hidden;
-}
-
-.accordion-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
+    transition: all 0.3s ease;
 }
 
 .accordion-button {
-    background: linear-gradient(90deg, #163a37, #1f9158);
+    background: linear-gradient(135deg, #087830, #3c4142);
     color: white;
     font-weight: bold;
-    border: 1px solid #dee2e6;
-    border-radius: 8px;
-    padding: 10px 15px;
-    flex: 1;
-    min-width: 200px;
-    text-align: left;
+    border: none;
+    padding: 15px;
+    font-size: 14px;
+    min-height: 60px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
 }
 
 .accordion-button:not(.collapsed) {
-    background: linear-gradient(90deg, #1f9158, #163a37);
+    background: linear-gradient(135deg, #087830, #3c4142);
 }
 
 .accordion-body {
@@ -196,22 +196,22 @@ body {
 }
 
 /* Status Badges */
-.status-completed {
-    background-color: #d1edff; 
-    color: #087830; 
-    padding: 4px 8px;
-    border-radius: 4px;
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: bold;
     font-size: 12px;
-    margin-left: 10px;
+    display: inline-block;
+}
+
+.status-completed {
+    background: #d1fae5;
+    color: #065f46;
 }
 
 .status-cancelled {
-    background-color: #f8d7da;
-    color: #721c24;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    margin-left: 10px;
+    background: #fef3c7;
+    color: #b45309;
 }
 
 /* Form Fields */
@@ -229,28 +229,15 @@ body {
 }
 
 .form-field .form-control {
-    background-color: #ffffff;
+    background: #fff;
     border: 1px solid #ced4da;
     border-radius: 6px;
-    padding: 10px 15px;
-    font-size: 14px;
+    padding: 12px;
+    font-size: 16px;
     color: #495057;
     width: 100%;
     box-sizing: border-box;
-}
-
-/* Row layout for form fields */
-.form-row {
-    display: flex;
-    flex-wrap: wrap;
-    margin: 0 -10px;
-}
-
-.form-col {
-    flex: 1;
-    min-width: 200px;
-    padding: 0 10px;
-    margin-bottom: 15px;
+    min-height: 44px;
 }
 
 /* Submit Feedback Button */
@@ -259,20 +246,43 @@ body {
     color: white;
     font-weight: bold;
     border: none;
-    padding: 8px 15px;
+    padding: 10px 20px;
     border-radius: 8px;
-    margin-left: 10px;
     font-size: 14px;
-    min-width: 150px;
-    height: auto;
     cursor: pointer;
     transition: all 0.3s ease;
     white-space: nowrap;
-    margin-top: 5px;
+    min-width: 180px;
 }
 
 .feedback-btn:hover {
     background: #087830;
+    color: white;
+}
+
+.feedback-btn:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.feedback-btn:disabled:hover {
+    background: #6c757d;
+}
+
+/* Feedback Submitted State */
+.feedback-submitted {
+    background: #6c757d !important;
+    cursor: not-allowed !important;
+}
+
+.feedback-submitted-text {
+    color: #28a745;
+    font-weight: bold;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 /* Modal Styles */
@@ -285,10 +295,41 @@ body {
     filter: invert(1);
 }
 
-/* Responsive adjustments */
+/* No attachment styling */
+.no-attachment {
+    color: #6c757d;
+    font-style: italic;
+}
+
+/* Enhanced highlight styles */
+.accordion-item.highlighted {
+    background-color: #e8f5e8;
+    border-left: 4px solid #1f9158;
+    transition: all 0.3s ease;
+}
+
+.accordion-item.highlighted .accordion-button {
+    background: linear-gradient(90deg, #1f9158, #163a37);
+}
+
+/* Scrollbar for WebKit */
+.concern-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.concern-container::-webkit-scrollbar-thumb {
+    background-color: #1f9158;
+    border-radius: 10px;
+}
+
+.concern-container::-webkit-scrollbar-track {
+    background-color: #f0f0f0;
+}
+
+/* Mobile Responsive */
 @media (max-width: 768px) {
     .navbar {
-        padding: 10px 15px;
+        padding: 12px 15px;
         flex-wrap: wrap;
     }
 
@@ -307,39 +348,25 @@ body {
         font-size: 13px;
     }
     
-    .main {
-        padding: 15px;
-    }
-    
     .concern-container {
-        padding: 10px;
-        max-height: 500px;
-    }
-    
-    .accordion-header {
-        flex-direction: column;
-        align-items: stretch;
+        padding: 20px;
+        margin: 0 10px 20px;
+        max-height: 65vh;
     }
     
     .accordion-button {
-        min-width: auto;
-        margin-bottom: 5px;
+        padding: 12px;
+        font-size: 13px;
+        min-height: 55px;
+    }
+    
+    .accordion-body {
+        padding: 12px;
     }
     
     .feedback-btn {
-        margin-left: 0;
         width: 100%;
-        margin-top: 5px;
-    }
-    
-    .form-col {
-        flex: 100%;
-        min-width: 100%;
-    }
-    
-    
-    .d-flex.justify-content-end {
-        justify-content: center !important;
+        margin-top: 10px;
     }
 }
 
@@ -362,8 +389,44 @@ body {
         font-size: 12px;
     }
     
-    .main {
+    .concern-container {
+        padding: 15px;
+    }
+    
+    .accordion-button {
         padding: 10px;
+        font-size: 12px;
+    }
+    
+    .accordion-body {
+        padding: 10px;
+    }
+    
+    .accordion-body .row {
+        margin-bottom: 12px;
+        flex-direction: column;
+    }
+
+    .accordion-body .col-md-6 {
+        width: 100%;
+        margin-bottom: 12px;
+    }
+
+    .accordion-body .col-md-6:last-child {
+        margin-bottom: 0;
+    }
+    
+    .form-field {
+        margin-bottom: 12px;
+    }
+    
+    .form-field .form-control {
+        font-size: 16px;
+    }
+    
+    .status-badge {
+        font-size: 11px;
+        padding: 5px 10px;
     }
 }
 
@@ -379,25 +442,22 @@ body {
         margin-right: 0;
     }
     
+    .navbar h2 {
+        margin-left: 0;
+    }
+    
+    .return-btn {
+        width: auto;
+        margin-left: 0;
+    }
+    
+    .concern-container {
+        padding: 12px;
+    }
+    
     .concern-header {
-        font-size: 16px;
-        padding: 6px;
-    }
-    
-    .accordion-button {
-        padding: 8px 12px;
-        font-size: 14px;
-    }
-    
-    .form-field .form-control {
-        padding: 8px 12px;
-        font-size: 13px;
-    }
-    
-    .status-completed,
-    .status-cancelled {
-        font-size: 11px;
-        padding: 3px 6px;
+        font-size: 15px;
+        padding: 10px;
     }
 }
 </style>
@@ -412,15 +472,14 @@ body {
     </div>
 
     <a href="<?= $return_url ?>" class="return-btn">
-    <i class="fas fa-arrow-left me-1"></i> Return
-</a>
+        <i class="fas fa-arrow-left me-1"></i> Return
+    </a>
 </div>
 
 <!-- Main Content -->
-<div class="main">
-
+<div class="container">
     <div class="concern-container">
-        <div class="concern-header">Concerns Details</div>
+        <div class="concern-header">Your Archived Concerns</div>
 
         <div class="accordion" id="concernsAccordion">
             <?php if ($concernsResult && $concernsResult->num_rows > 0): 
@@ -434,56 +493,44 @@ body {
                     };
                     $concernID = $row['ConcernID'];
                     $date = date("l, d M Y", strtotime($row['Concern_Date']));
+                    $hasFeedback = !empty($row['FeedbackID']);
+                    $feedbackDate = $hasFeedback ? date('M d, Y', strtotime($row['FeedbackDate'])) : '';
             ?>
                 <div class="accordion-item">
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
-                                    data-bs-target="#concern<?= $index ?>" aria-expanded="false" 
-                                    aria-controls="concern<?= $index ?>">
-                                <span class="d-flex justify-content-between w-100 align-items-center flex-wrap">
-                                    <span class="me-2" style="font-size: 13px;"><?= $date ?></span>
-                                    <span class="me-2" style="font-size: 20px;"><?= htmlspecialchars($row['Concern_Title']) ?></span>
-                                    <span class="badge <?= $statusClass ?> status-badge"><?= htmlspecialchars($status) ?></span>
-                                </span>
-                            </button>
-                        <button class="feedback-btn" data-bs-toggle="modal" data-bs-target="#feedbackModal" data-concernid="<?= $concernID ?>">
-                            Submit Feedback
+                                data-bs-target="#concern<?= $index ?>" aria-expanded="false" 
+                                aria-controls="concern<?= $index ?>">
+                            <span class="d-flex justify-content-between w-100 align-items-center flex-wrap">
+                                <span class="me-2" style="font-size: 13px;"><?= $date ?></span>
+                                <span class="me-2" style="font-size: 20px;"><?= htmlspecialchars($row['Concern_Title']) ?></span>
+                                <span class="badge <?= $statusClass ?> status-badge"><?= htmlspecialchars($status) ?></span>
+                            </span>
                         </button>
                     </h2>
                     <div id="concern<?= $index ?>" class="accordion-collapse collapse" data-bs-parent="#concernsAccordion">
                         <div class="accordion-body">
+                            <!-- Concern Title -->
                             <div class="form-field">
                                 <label>Concern Title</label>
                                 <div class="form-control"><?= htmlspecialchars($row['Concern_Title']) ?></div>
                             </div>
+                            
+                            <!-- Description -->
                             <div class="form-field">
                                 <label>Description</label>
                                 <div class="form-control"><?= htmlspecialchars($row['Description']) ?></div>
                             </div>
-                            
-                            <div class="form-row">
-                                <div class="form-col">
-                                    <div class="form-field">
-                                        <label>Equipment / Facility</label>
-                                        <div class="form-control"><?= !empty($row['EFname']) ? htmlspecialchars($row['EFname']) : 'Not specified' ?></div>
-                                    </div>
-                                </div>
-                                <div class="form-col">
-                                    <div class="form-field">
-                                        <label>Service Type</label>
-                                        <div class="form-control"><?= htmlspecialchars($row['Service_type']) ?></div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="form-row">
-                                <div class="form-col">
+
+                            <!-- Room and Building in same row -->
+                            <div class="row">
+                                <div class="col-md-6">
                                     <div class="form-field">
                                         <label>Room</label>
                                         <div class="form-control"><?= htmlspecialchars($row['Room']) ?></div>
                                     </div>
                                 </div>
-                                <div class="form-col">
+                                <div class="col-md-6">
                                     <div class="form-field">
                                         <label>Building</label>
                                         <div class="form-control">
@@ -492,28 +539,85 @@ body {
                                     </div>
                                 </div>
                             </div>
-                            
+
+                            <!-- Service Type and Equipment/Facility in same row -->
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-field">
+                                        <label>Service Type</label>
+                                        <div class="form-control"><?= htmlspecialchars($row['Service_type']) ?></div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-field">
+                                        <label>Equipment / Facility</label>
+                                        <div class="form-control">
+                                            <?= !empty($row['EFname']) ? htmlspecialchars($row['EFname']) : 'Not specified' ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Assigned To -->
                             <div class="form-field">
                                 <label>Assigned To</label>
-                                <div class="form-control"><?= !empty($row['Assigned_to']) ? htmlspecialchars($row['Assigned_to']) : 'Not assigned' ?></div>
+                                <div class="form-control"><?= !empty($row['Assigned_to']) ? htmlspecialchars($row['Assigned_to']) : 'Not assigned yet' ?></div>
                             </div>
-                            <?php if (!empty($row['Attachment'])): ?>
+                            
+                            <!-- Attachment - Always show this field -->
                             <div class="form-field">
                                 <label>Attachment</label>
                                 <div class="form-control">
-                                    <?php 
-                                    $attachment = htmlspecialchars($row['Attachment']);
-                                    if (preg_match('/\.(jpg|jpeg|png|gif|bmp)$/i', $attachment)): 
-                                    ?>
-                                        <a href="<?= $attachment ?>" target="_blank" class="text-decoration-none">
-                                            <i class="fas fa-image me-1"></i>View Image
-                                        </a>
+                                    <?php if (!empty($row['Attachment'])): ?>
+                                        <?php 
+                                        $attachment = htmlspecialchars($row['Attachment']);
+                                        if (preg_match('/\.(jpg|jpeg|png|gif|bmp)$/i', $attachment)): 
+                                        ?>
+                                            <a href="<?= $attachment ?>" target="_blank" class="text-decoration-none">
+                                                <i class="fas fa-image me-1"></i>View Image
+                                            </a>
+                                        <?php else: ?>
+                                            <?= $attachment ?>
+                                        <?php endif; ?>
                                     <?php else: ?>
-                                        <?= $attachment ?>
+                                        <span class="no-attachment">No attachment</span>
                                     <?php endif; ?>
                                 </div>
                             </div>
-                            <?php endif; ?>
+
+                            <!-- Feedback Section -->
+                            <div class="form-field">
+                                <label>Feedback Status</label>
+                                <div class="form-control">
+                                    <?php if ($hasFeedback): ?>
+                                        <div class="feedback-submitted-text">
+                                            <i class="fas fa-check-circle text-success"></i>
+                                            <span>Feedback submitted on <?= $feedbackDate ?></span>
+                                        </div>
+                                        <?php if (!empty($row['FeedbackComments'])): ?>
+                                            <div class="mt-2 p-2 bg-light rounded">
+                                                <strong>Your feedback:</strong>
+                                                <p class="mb-0"><?= htmlspecialchars($row['FeedbackComments']) ?></p>
+                                            </div>
+                                        <?php endif; ?>
+                                    <?php else: ?>
+                                        <span class="text-muted">No feedback submitted yet</span>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+
+                            <!-- Feedback Button -->
+                            <div class="text-end mt-3">
+                                <?php if ($hasFeedback): ?>
+                                    <button class="feedback-btn" disabled>
+                                        <i class="fas fa-check me-1"></i> Feedback Already Submitted
+                                    </button>
+                                <?php else: ?>
+                                    <button class="feedback-btn" data-bs-toggle="modal" data-bs-target="#feedbackModal" data-concernid="<?= $concernID ?>">
+                                        <i class="fas fa-comment me-1"></i> Submit Feedback
+                                    </button>
+                                <?php endif; ?>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -521,7 +625,7 @@ body {
                 $index++;
                 endwhile; 
             else: ?>
-                <div class="alert alert-info">No completed or cancelled concerns to display.</div>
+                <div class="alert alert-info text-center">You have no archived concerns yet.</div>
             <?php endif; ?>
         </div>
     </div>
@@ -529,13 +633,13 @@ body {
 
 <!-- Feedback Modal -->
 <div class="modal fade" id="feedbackModal" tabindex="-1" aria-labelledby="feedbackModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header">
+            <div class="modal-header" style="background: linear-gradient(135deg, #087830, #3c4142); color:white;">
                 <h5 class="modal-title" id="feedbackModalLabel">
                     <i class="fas fa-comment me-2"></i>Submit Feedback
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="feedbackForm" method="POST">
                 <div class="modal-body">
@@ -543,10 +647,10 @@ body {
                     <div class="mb-3">
                         <label for="comments" class="form-label fw-bold">Your Feedback/Comments:</label>
                         <textarea class="form-control" id="comments" name="comments" rows="4" placeholder="Enter your feedback about how this concern was handled..." required></textarea>
+                        <div class="form-text">You can only submit feedback once per concern.</div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <!-- REMOVED: Cancel button -->
                     <button type="submit" class="btn btn-success w-100">
                         <i class="fas fa-paper-plane me-1"></i> Submit Feedback
                     </button>
@@ -576,6 +680,12 @@ document.getElementById('feedbackForm').addEventListener('submit', function(e) {
     
     const formData = new FormData(this);
     
+    // Show loading state
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Submitting...';
+    submitBtn.disabled = true;
+    
     fetch('submit_feedback.php', {
         method: 'POST',
         body: formData
@@ -593,19 +703,9 @@ document.getElementById('feedbackForm').addEventListener('submit', function(e) {
                 title: 'Success!',
                 text: 'Your feedback has been submitted successfully.',
                 confirmButtonColor: '#087830'
-            });
-            
-            // Clear form
-            document.getElementById('feedbackForm').reset();
-            
-            // Optionally disable the feedback button for this concern
-            const concernId = document.getElementById('modalConcernID').value;
-            const feedbackButtons = document.querySelectorAll(`[data-concernid="${concernId}"]`);
-            feedbackButtons.forEach(btn => {
-                btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-check me-1"></i> Feedback Submitted';
-                btn.style.backgroundColor = '#6c757d';
-                btn.style.cursor = 'not-allowed';
+            }).then(() => {
+                // Reload the page to show updated feedback status
+                window.location.reload();
             });
         } else {
             Swal.fire({
@@ -614,6 +714,10 @@ document.getElementById('feedbackForm').addEventListener('submit', function(e) {
                 text: data.message || 'Failed to submit feedback. Please try again.',
                 confirmButtonColor: '#dc3545'
             });
+            
+            // Reset button state on error
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
         }
     })
     .catch(error => {
@@ -624,6 +728,10 @@ document.getElementById('feedbackForm').addEventListener('submit', function(e) {
             text: 'An error occurred. Please try again.',
             confirmButtonColor: '#dc3545'
         });
+        
+        // Reset button state on error
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
     });
 });
 </script>

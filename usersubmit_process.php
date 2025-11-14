@@ -4,8 +4,8 @@ include("config.php");
 
 // Check if user is logged in
 if (!isset($_SESSION['username'])) {
-    header("Location: user_login.php");
-    exit();
+    echo json_encode(['success' => false, 'message' => 'User not logged in.']);
+    exit;
 }
 
 // Get the logged-in user's AccountID
@@ -17,9 +17,8 @@ $result = $stmt->get_result();
 
 if ($result->num_rows === 0) {
     // User not found
-    $_SESSION['error'] = "User not found. Please login again.";
-    header("Location: user_login.php");
-    exit();
+    echo json_encode(['success' => false, 'message' => 'User not found. Please login again.']);
+    exit;
 }
 
 $user = $result->fetch_assoc();
@@ -64,7 +63,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $equipment_list = implode(', ', $equipment_array);
     }
     
-    // Handle file upload
+    // Handle file upload (OPTIONAL)
     $attachment_path = '';
     if (isset($_FILES['attachment']) && $_FILES['attachment']['error'] === UPLOAD_ERR_OK) {
         $upload_dir = "uploads/";
@@ -83,29 +82,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if (move_uploaded_file($_FILES['attachment']['tmp_name'], $target_path)) {
                 $attachment_path = $target_path;
             } else {
-                $_SESSION['error'] = "Failed to upload file.";
-                header("Location: usersubmit.php");
-                exit();
+                echo json_encode(['success' => false, 'message' => 'Failed to upload file.']);
+                exit;
             }
         } else {
-            $_SESSION['error'] = "Invalid file type. Allowed types: JPG, PNG, GIF, MP4, MOV.";
-            header("Location: usersubmit.php");
-            exit();
+            echo json_encode(['success' => false, 'message' => 'Invalid file type. Allowed types: JPG, PNG, GIF, MP4, MOV.']);
+            exit;
         }
-    } else {
-        $_SESSION['error'] = "Please attach a file.";
-        header("Location: usersubmit.php");
-        exit();
     }
+    // If no file uploaded, attachment_path remains empty - this is OK now
     
     // Validate required fields
     if (empty($title) || empty($description) || empty($building) || empty($room) || empty($service_type) || empty($equipment_list)) {
-        $_SESSION['error'] = "Please fill out all required fields.";
-        header("Location: usersubmit.php");
-        exit();
+        echo json_encode(['success' => false, 'message' => 'Please fill out all required fields.']);
+        exit;
     }
     
-    // Insert into concerns table - MAKE SURE AccountID is included
+    // Insert into concerns table
     $sql = "INSERT INTO concerns (Concern_Title, Description, building_name, Room, Service_type, EFname, Attachment, AccountID) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     
@@ -114,20 +107,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->bind_param("sssssssi", $title, $description, $building, $room, $service_type, $equipment_list, $attachment_path, $accountID);
         
         if ($stmt->execute()) {
-            $_SESSION['error'] = "Error submitting concern: " . $stmt->error;
-            header("Location: usersubmit.php");
-            exit();
+            echo json_encode(['success' => true, 'message' => 'Your concern has been submitted successfully!']);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Error submitting concern: ' . $stmt->error]);
         }
         $stmt->close();
     } else {
-        $_SESSION['error'] = "Database error: " . $conn->error;
-        header("Location: usersubmit.php");
-        exit();
+        echo json_encode(['success' => false, 'message' => 'Database error: ' . $conn->error]);
     }
 } else {
     // Not a POST request
-    $_SESSION['error'] = "Invalid request method.";
-    header("Location: usersubmit.php");
-    exit();
+    echo json_encode(['success' => false, 'message' => 'Invalid request method.']);
 }
 ?>

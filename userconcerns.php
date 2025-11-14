@@ -73,33 +73,14 @@ $stmt->close();
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 
     <style>
-        /* FIXED: Better base styles for mobile */
-        * {
-            -webkit-tap-highlight-color: transparent;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-        
-        input, textarea, .form-control {
-            -webkit-user-select: text;
-            -moz-user-select: text;
-            -ms-user-select: text;
-            user-select: text;
-        }
-
         body {
             margin: 0;
             font-family: 'Poppins', sans-serif;
             font-weight: 600;
             background: #f9fafb;
-            /* FIXED: Prevent horizontal scroll on mobile */
             overflow-x: hidden;
         }
 
-        /* Navbar Styles - FIXED for mobile */
         .navbar {
             display: flex;
             align-items: center;
@@ -108,7 +89,6 @@ $stmt->close();
             color: white;
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
             position: relative;
-            /* FIXED: Ensure navbar doesn't cause overflow */
             width: 100%;
             box-sizing: border-box;
         }
@@ -159,7 +139,7 @@ $stmt->close();
             cursor: pointer;
         }
 
-        /* FIXED: Dropdown Menu for touch */
+        /* FIXED: Dropdown Menu for touch - UPDATED TO KEEP WHITE TEXT */
         .dropdown {
             position: relative;
         }
@@ -180,12 +160,13 @@ $stmt->close();
             position: absolute;
             top: 100%;
             right: 0;
-            background: white;
+            background: linear-gradient(135deg, #087830, #3c4142);
             min-width: 180px;
             border-radius: 5px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
             overflow: hidden;
             z-index: 1000;
+            border: none;
         }
 
         .dropdown:hover .dropdown-menu,
@@ -196,20 +177,20 @@ $stmt->close();
         .dropdown-menu a {
             display: block;
             padding: 12px 16px;
-            color: #333;
+            color: white; 
             text-decoration: none;
             font-size: 14px;
-            /* FIXED: Better touch targets */
             min-height: 44px;
             display: flex;
             align-items: center;
+            transition: background-color 0.3s;
         }
 
         .dropdown-menu a:hover {
-            background: #f1f1f1;
+            background: #107040; 
+            color: white; 
         }
 
-        /* Concern Container - FIXED for mobile */
         .concern-container {
             background: white;
             padding: 15px;
@@ -251,7 +232,6 @@ $stmt->close();
             border: none;
             padding: 15px;
             font-size: 14px;
-            /* FIXED: Better touch target */
             min-height: 60px;
             display: flex;
             align-items: center;
@@ -285,7 +265,6 @@ $stmt->close();
             color: #1e40af;
         }
 
-        /* Form Fields - FIXED for mobile */
         .form-field {
             margin-bottom: 15px;
             text-align: left;
@@ -304,14 +283,18 @@ $stmt->close();
             border: 1px solid #ced4da;
             border-radius: 6px;
             padding: 12px;
-            font-size: 16px; /* FIXED: Better for iOS zoom */
+            font-size: 16px; 
             color: #495057;
             width: 100%;
             box-sizing: border-box;
-            min-height: 44px; /* FIXED: Better touch target */
+            min-height: 44px; 
         }
 
-        /* Enhanced highlight styles for auto-opened concerns */
+        .no-attachment {
+            color: #6c757d;
+            font-style: italic;
+        }
+
         .accordion-item.highlighted {
             background-color: #e8f5e8;
             border-left: 4px solid #1f9158;
@@ -530,8 +513,8 @@ $stmt->close();
 
     <div class="dropdown ms-auto">
         <button class="btn dropdown-toggle username-btn" aria-expanded="false" aria-haspopup="true">
-                <i class="fas fa-user-circle me-1"></i> <?= htmlspecialchars($name) ?>
-            </button>
+            <i class="fas fa-user-circle me-1"></i> <?= htmlspecialchars($name) ?>
+        </button>
         <ul class="dropdown-menu dropdown-menu-end">
             <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
                 <i class="fas fa-key me-2"></i>Change Password
@@ -631,24 +614,26 @@ $stmt->close();
                                     <div class="form-control"><?= !empty($row['Assigned_to']) ? htmlspecialchars($row['Assigned_to']) : 'Not assigned yet' ?></div>
                                 </div>
                                 
-                                <?php if (!empty($row['Attachment'])): ?>
-                                <!-- Attachment -->
+                                <!-- Attachment - Always show this field -->
                                 <div class="form-field">
                                     <label>Attachment</label>
                                     <div class="form-control">
-                                        <?php 
-                                        $attachment = htmlspecialchars($row['Attachment']);
-                                        if (preg_match('/\.(jpg|jpeg|png|gif|bmp)$/i', $attachment)): 
-                                        ?>
-                                            <a href="<?= $attachment ?>" target="_blank" class="text-decoration-none">
-                                                <i class="fas fa-image me-1"></i>View Image
-                                            </a>
+                                        <?php if (!empty($row['Attachment'])): ?>
+                                            <?php 
+                                            $attachment = htmlspecialchars($row['Attachment']);
+                                            if (preg_match('/\.(jpg|jpeg|png|gif|bmp)$/i', $attachment)): 
+                                            ?>
+                                                <a href="<?= $attachment ?>" target="_blank" class="text-decoration-none">
+                                                    <i class="fas fa-image me-1"></i>View Image
+                                                </a>
+                                            <?php else: ?>
+                                                <?= $attachment ?>
+                                            <?php endif; ?>
                                         <?php else: ?>
-                                            <?= $attachment ?>
+                                            <span class="no-attachment">No attachment</span>
                                         <?php endif; ?>
                                     </div>
                                 </div>
-                                <?php endif; ?>
                             </div>
                         </div>
                     </div>

@@ -15,7 +15,7 @@ $name = isset($_SESSION['name']) ? $_SESSION['name'] : $username;
 $activePage = "dashboard";
 
 // Fetch AccountID from session or database
-$accountID = $_SESSION['account_id'] ?? null;
+$accountID = $_SESSION['accountid'] ?? null;
 
 if (!$accountID) {
     // Query database to get AccountID for the current user
@@ -26,7 +26,7 @@ if (!$accountID) {
 
     if ($row = $result->fetch_assoc()) {
         $accountID = $row['AccountID'];
-        $_SESSION['account_id'] = $accountID;
+        $_SESSION['accountid'] = $accountID;
     } else {
         // Handle error - user not found
         header("Location: user_login.php");
@@ -42,44 +42,56 @@ $inProgress = 0;
 $completed = 0; 
 
 if ($accountID) {
-    // Define queries for total and status-specific concerns
-    $queries = [
-        "total"      => "SELECT COUNT(*) AS total FROM concerns WHERE AccountID = ?",
-        "pending"    => "SELECT COUNT(*) AS pending FROM concerns WHERE AccountID = ? AND Status = 'Pending'",
-        "inProgress" => "SELECT COUNT(*) AS inProgress FROM concerns WHERE AccountID = ? AND Status = 'In Progress'",
-        "completed"   => "SELECT COUNT(*) AS completed FROM concerns WHERE AccountID = ? AND Status = 'Completed'"
-    ];
-
-    // Execute each query and store results in corresponding variable
-    foreach ($queries as $key => $sql) {
-        $stmt = $conn->prepare($sql);
+    try {
+        // Get all counts in one efficient query
+        $stmt = $conn->prepare("
+            SELECT 
+                COUNT(*) as total,
+                SUM(CASE WHEN Status = 'Pending' THEN 1 ELSE 0 END) as pending,
+                SUM(CASE WHEN Status = 'In Progress' THEN 1 ELSE 0 END) as inProgress,
+                SUM(CASE WHEN Status = 'Completed' THEN 1 ELSE 0 END) as completed
+            FROM concerns 
+            WHERE AccountID = ?
+        ");
         $stmt->bind_param("i", $accountID);
         $stmt->execute();
         $result = $stmt->get_result();
-        $row = $result->fetch_assoc();
-
-        ${$key} = $row[$key] ?? 0;
+        if ($row = $result->fetch_assoc()) {
+            $total = $row['total'] ?? 0;
+            $pending = $row['pending'] ?? 0;
+            $inProgress = $row['inProgress'] ?? 0;
+            $completed = $row['completed'] ?? 0;
+        }
         $stmt->close();
-    }
 
-    // Fetch recent concerns (ALL statuses including Completed) for display
-    $recentConcerns = [];
-    
-    // FIXED: Only select the fields we need to display
-    $stmt = $conn->prepare("
-    SELECT ConcernID, Concern_Title, Room, Service_type, Status, Concern_Date
-    FROM concerns
-    WHERE AccountID = ? 
-    ORDER BY Concern_Date DESC
-    LIMIT 5");
-    
-    $stmt->bind_param("i", $accountID);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    while ($row = $result->fetch_assoc()) {
-        $recentConcerns[] = $row;
+        // Fetch recent concerns for display
+        $recentConcerns = [];
+        
+        $stmt = $conn->prepare("
+            SELECT ConcernID, Concern_Title, Room, Service_type, Status, Concern_Date
+            FROM concerns
+            WHERE AccountID = ? 
+            ORDER BY Concern_Date DESC
+            LIMIT 5
+        ");
+        
+        $stmt->bind_param("i", $accountID);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        while ($row = $result->fetch_assoc()) {
+            $recentConcerns[] = $row;
+        }
+        $stmt->close();
+
+    } catch (Exception $e) {
+        error_log("Error fetching concern counts: " . $e->getMessage());
+        // Set default values to prevent errors
+        $total = 0;
+        $pending = 0;
+        $inProgress = 0;
+        $completed = 0;
+        $recentConcerns = [];
     }
-    $stmt->close();
 }
 ?>
 <!DOCTYPE html>
@@ -99,22 +111,6 @@ if ($accountID) {
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 
     <style>
-        * {
-            -webkit-tap-highlight-color: transparent;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-        
-        input, textarea, .form-control {
-            -webkit-user-select: text;
-            -moz-user-select: text;
-            -ms-user-select: text;
-            user-select: text;
-        }
-
         body {
             margin: 0;
             font-family: 'Poppins', sans-serif;
@@ -200,7 +196,7 @@ if ($accountID) {
             position: absolute;
             top: 100%;
             right: 0;
-            background: white;
+            background: linear-gradient(135deg, #087830, #3c4142);
             min-width: 180px;
             border-radius: 5px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
@@ -216,7 +212,7 @@ if ($accountID) {
         .dropdown-menu a {
             display: block;
             padding: 12px 16px;
-            color: #333;
+            color: white;
             text-decoration: none;
             font-size: 14px;
             min-height: 44px;
@@ -254,6 +250,9 @@ if ($accountID) {
             text-align: left;
             min-height: 110px;
             border: 1px solid #e5e7eb; 
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
         .dashboard-card:hover {
             transform: translateY(-3px);
@@ -270,6 +269,7 @@ if ($accountID) {
             font-weight: 700; 
             margin: 0; 
             line-height: 1; 
+            color: inherit;
         }
 
         .card-label { 
@@ -434,6 +434,14 @@ if ($accountID) {
 
         #announcementsContainer::-webkit-scrollbar-track { 
             background-color: #f0f0f0; 
+        }
+
+        .recent-concerns-panel table tbody td {
+            font-weight: normal;
+        }
+
+        .recent-concerns-panel table thead th {
+            font-weight: bold;
         }
 
         @media (max-width: 480px) {
@@ -671,55 +679,55 @@ if ($accountID) {
     </div>
 
     <div class="recent-concerns-panel">
-        <h3>My Recent Concerns</h3>
+    <h3>My Recent Concerns</h3>
 
-        <?php if (!empty($recentConcerns)): ?>
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
+    <?php if (!empty($recentConcerns)): ?>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Title</th>
+                        <th scope="col">Room/Area</th>
+                        <th scope="col">Service Type</th>
+                        <th scope="col">Date Submitted</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($recentConcerns as $concern): ?>
                         <tr>
-                            <th scope="col">ID</th>
-                            <th scope="col">Title</th>
-                            <th scope="col">Room/Area</th>
-                            <th scope="col">Service Type</th>
-                            <th scope="col">Date Submitted</th>
-                            <th scope="col">Status</th>
+                            <td><?= htmlspecialchars($concern['ConcernID']) ?></td>
+                            <td><?= htmlspecialchars($concern['Concern_Title']) ?></td>
+                            <td><?= htmlspecialchars($concern['Room']) ?></td>
+                            <td><?= htmlspecialchars($concern['Service_type']) ?></td>
+                            <td><?= date('M d, Y', strtotime($concern['Concern_Date'])) ?></td>
+                            <td>
+                                <?php
+                                $status = htmlspecialchars($concern['Status']);
+                                $statusClass = strtolower(str_replace(' ', '-', $status));
+                                echo '<span class="status-pill status-' . $statusClass . '">' . $status . '</span>';
+                                ?>
+                            </td>
+                            <td>
+                                <a href="userconcerns.php?open_concern=<?= $concern['ConcernID'] ?>" class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($recentConcerns as $concern): ?>
-                            <tr>
-                                <td><?= htmlspecialchars($concern['ConcernID']) ?></td>
-                                <td class="fw-bold"><?= htmlspecialchars($concern['Concern_Title']) ?></td>
-                                <td><?= htmlspecialchars($concern['Room']) ?></td>
-                                <td><?= htmlspecialchars($concern['Service_type']) ?></td>
-                                <td><?= date('M d, Y', strtotime($concern['Concern_Date'])) ?></td>
-                                <td>
-                                    <?php
-                                    $status = htmlspecialchars($concern['Status']);
-                                    $statusClass = strtolower(str_replace(' ', '-', $status));
-                                    echo '<span class="status-pill status-' . $statusClass . '">' . $status . '</span>';
-                                    ?>
-                                </td>
-                                <td>
-                                    <a href="userconcerns.php?open_concern=<?= $concern['ConcernID'] ?>" class="btn btn-sm btn-outline-secondary">
-                                        <i class="fas fa-eye"></i> View
-                                    </a>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-            <div class="text-end mt-3">
-                <a href="userconcerns.php" class="btn btn-sm btn-outline-secondary">View All Concerns <i class="fas fa-arrow-right ms-2"></i></a>
-            </div>
-        <?php else: ?>
-            <div class="alert alert-info text-center">
-                You haven't submitted any concerns yet. Click the button above to report an issue!
-            </div>
-        <?php endif; ?>
-    </div>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+        <div class="text-end mt-3">
+            <a href="userconcerns.php" class="btn btn-sm btn-outline-secondary">View All Concerns <i class="fas fa-arrow-right ms-2"></i></a>
+        </div>
+    <?php else: ?>
+        <div class="alert alert-info text-center">
+            You haven't submitted any concerns yet. Click the button above to report an issue!
+        </div>
+    <?php endif; ?>
 </div>
 
 <!-- Scripts -->

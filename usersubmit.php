@@ -23,6 +23,7 @@ $equipment = $conn->query("SELECT * FROM equipmentfacility ORDER BY EFname");
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <style>
         body {
             margin: 0;
@@ -114,6 +115,12 @@ $equipment = $conn->query("SELECT * FROM equipmentfacility ORDER BY EFname");
             font-weight: bold;
             color: #163a37;
             margin-bottom: 8px;
+        }
+
+        .form-label.optional::after {
+            content: " (Optional)";
+            color: #6c757d;
+            font-weight: normal;
         }
 
         .custom-select {
@@ -389,25 +396,6 @@ $equipment = $conn->query("SELECT * FROM equipmentfacility ORDER BY EFname");
 </head>
 <body>
 
-<!-- Display Success/Error Messages -->
-<?php if (isset($_SESSION['success'])): ?>
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <i class="fas fa-check-circle me-2"></i>
-        <?= $_SESSION['success'] ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    <?php unset($_SESSION['success']); ?>
-<?php endif; ?>
-
-<?php if (isset($_SESSION['error'])): ?>
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="fas fa-exclamation-circle me-2"></i>
-        <?= $_SESSION['error'] ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    <?php unset($_SESSION['error']); ?>
-<?php endif; ?>
-
 <!-- Navbar -->
 <div class="navbar">
     <div class="logo">
@@ -540,9 +528,9 @@ $equipment = $conn->query("SELECT * FROM equipmentfacility ORDER BY EFname");
 
             <!-- File attachment -->
             <div class="mb-3">
-                <label for="attachment" class="form-label">Attachment (Photo/Video) <span class="text-danger">*</span></label>
-                <input type="file" class="form-control" id="attachment" name="attachment" accept=".jpg,.jpeg,.png,.gif,.mp4,.mov" required>
-                <small class="text-muted">Max file size: 5MB. Allowed types: JPG, PNG, GIF, MP4, MOV.</small>
+                <label for="attachment" class="form-label optional">Attachment (Photo/Video)</label>
+                <input type="file" class="form-control" id="attachment" name="attachment" accept=".jpg,.jpeg,.png,.gif,.mp4,.mov">
+                <small class="text-muted">Max file size: 5MB. Allowed types: JPG, PNG, GIF, MP4, MOV. (Optional)</small>
             </div>
 
             <!-- Submit button -->
@@ -555,6 +543,8 @@ $equipment = $conn->query("SELECT * FROM equipmentfacility ORDER BY EFname");
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<!-- SweetAlert2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -815,13 +805,68 @@ document.addEventListener('click', function(e) {
     }
 });
 
-// Form validation
+// Reset all custom dropdowns to initial state
+function resetCustomDropdowns() {
+    // Reset building dropdown
+    const buildingSelected = document.querySelector('#buildingSelect .select-selected');
+    buildingSelected.textContent = 'Select a building';
+    buildingSelected.classList.add('placeholder');
+    document.getElementById('buildingInput').value = '';
+    document.getElementById('otherBuildingContainer').style.height = '0';
+    document.getElementById('other_building').value = '';
+
+    // Reset room dropdown
+    const roomSelected = document.querySelector('#roomSelect .select-selected');
+    roomSelected.textContent = 'Select a building first';
+    roomSelected.classList.add('placeholder');
+    document.getElementById('roomInput').value = '';
+    document.getElementById('otherRoomContainer').style.height = '0';
+    document.getElementById('other_room').value = '';
+    document.getElementById('roomSelect').classList.add('disabled');
+
+    // Reset service dropdown
+    const serviceSelected = document.querySelector('#serviceSelect .select-selected');
+    serviceSelected.textContent = 'Select service type';
+    serviceSelected.classList.add('placeholder');
+    document.getElementById('serviceInput').value = '';
+    document.getElementById('otherServiceContainer').style.height = '0';
+    document.getElementById('other_service').value = '';
+
+    // Reset equipment dropdown
+    const equipmentSelected = document.querySelector('#equipmentSelect .select-selected');
+    equipmentSelected.textContent = 'Select equipment/facility';
+    equipmentSelected.classList.add('placeholder');
+    document.getElementById('selectedEquipment').textContent = '';
+    
+    // Uncheck all equipment checkboxes
+    document.querySelectorAll('input[name="equipment[]"]').forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    
+    document.getElementById('otherEquipmentContainer').style.height = '0';
+    document.getElementById('other_equipment').value = '';
+
+    // Reset file input
+    document.getElementById('attachment').value = '';
+
+    // Reset border styles if they were highlighted as errors
+    document.querySelectorAll('.custom-select .select-selected, .equipment-dropdown .select-selected').forEach(element => {
+        element.style.border = '1px solid #ced4da';
+    });
+    
+    document.getElementById('title').style.border = '1px solid #ced4da';
+    document.getElementById('description').style.border = '1px solid #ced4da';
+}
+
+// Form validation and submission
 const form = document.getElementById('concernForm');
 form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
     let valid = true;
 
     // Validate required inputs
-    ['title','description','attachment'].forEach(id => {
+    ['title','description'].forEach(id => {
         const input = document.getElementById(id);
         if (!input.value) {
             valid = false;
@@ -854,16 +899,82 @@ form.addEventListener('submit', function(e) {
     }
 
     if (!valid) {
-        e.preventDefault();
-        alert('Please fill out all required fields before submitting.');
+        Swal.fire({
+            icon: 'error',
+            title: 'Missing Information',
+            text: 'Please fill out all required fields before submitting.',
+            confirmButtonColor: '#dc3545',
+            confirmButtonText: 'OK'
+        });
+        return;
     }
+
+    // Show loading state
+    const submitBtn = form.querySelector('.submit-btn');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting...';
+    submitBtn.disabled = true;
+
+    // Create FormData object
+    const formData = new FormData(form);
+
+    // Submit the form via fetch
+    fetch('usersubmit_process.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: data.message,
+                confirmButtonText: 'OK'
+            }).then(() => {
+                // Reset the form and stay on the same page
+                form.reset();
+                resetCustomDropdowns();
+                window.scrollTo(0, 0);
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: data.message,
+                confirmButtonColor: '#dc3545',
+                confirmButtonText: 'OK'
+            });
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: 'Something went wrong. Please try again.',
+            confirmButtonColor: '#dc3545',
+            confirmButtonText: 'OK'
+        });
+    })
+    .finally(() => {
+        // Reset button state
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
 });
 
-// File size validation
+// File size validation (only if file is selected)
 document.getElementById('attachment').addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (file && file.size > 5 * 1024 * 1024) {
-        alert('File size must be less than 5MB.');
+        Swal.fire({
+            icon: 'error',
+            title: 'File Too Large',
+            text: 'File size must be less than 5MB.',
+            confirmButtonColor: '#dc3545',
+            confirmButtonText: 'OK'
+        });
         e.target.value = '';
     }
 });

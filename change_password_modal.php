@@ -2,7 +2,7 @@
 <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
-      <div class="modal-header" style="background-color:#1f9158; color:white;">
+      <div class="modal-header" style="background: linear-gradient(135deg, #087830, #3c4142); color:white;">
         <h5 class="modal-title" id="changePasswordLabel">
             <i class="fas fa-key me-2"></i>Change Password
         </h5>
@@ -40,7 +40,6 @@
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
         <button type="button" class="btn btn-success" id="savePasswordBtn">
             <i class="fas fa-save me-1"></i>Change Password
         </button>
