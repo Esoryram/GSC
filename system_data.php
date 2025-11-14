@@ -29,19 +29,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 break;
                 
             case 'edit_room':
-                $id = $_POST['id'];
+                $RoomID = $_POST['RoomID']; // Changed from 'id' to 'RoomID'
                 $roomname = $_POST['roomname'];
                 $building_name = $_POST['building_name'];
                 
-                $stmt = $conn->prepare("UPDATE rooms SET roomname = ?, building_name = ? WHERE id = ?");
-                $stmt->bind_param("ssi", $roomname, $building_name, $id);
+                $stmt = $conn->prepare("UPDATE rooms SET roomname = ?, building_name = ? WHERE RoomID = ?");
+                $stmt->bind_param("ssi", $roomname, $building_name, $RoomID);
                 $stmt->execute();
                 break;
                 
             case 'delete_room':
-                $id = $_POST['id'];
-                $stmt = $conn->prepare("DELETE FROM rooms WHERE id = ?");
-                $stmt->bind_param("i", $id);
+                $RoomID = $_POST['RoomID']; // Changed from 'id' to 'RoomID'
+                $stmt = $conn->prepare("DELETE FROM rooms WHERE RoomID = ?");
+                $stmt->bind_param("i", $RoomID);
                 $stmt->execute();
                 break;
                 
@@ -102,18 +102,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 break;
                 
             case 'edit_service':
-                $serviceID = $_POST['serviceID'];
+                $ServiceID = $_POST['ServiceID']; // Changed from 'serviceID' to 'ServiceID'
                 $Service_type = $_POST['Service_type'];
                 
-                $stmt = $conn->prepare("UPDATE services SET Service_type = ? WHERE serviceID = ?");
-                $stmt->bind_param("si", $Service_type, $serviceID);
+                $stmt = $conn->prepare("UPDATE services SET Service_type = ? WHERE ServiceID = ?");
+                $stmt->bind_param("si", $Service_type, $ServiceID);
                 $stmt->execute();
                 break;
                 
             case 'delete_service':
-                $serviceID = $_POST['serviceID'];
-                $stmt = $conn->prepare("DELETE FROM services WHERE serviceID = ?");
-                $stmt->bind_param("i", $serviceID);
+                $ServiceID = $_POST['ServiceID']; // Changed from 'serviceID' to 'ServiceID'
+                $stmt = $conn->prepare("DELETE FROM services WHERE ServiceID = ?");
+                $stmt->bind_param("i", $ServiceID);
                 $stmt->execute();
                 break;
         }
@@ -128,7 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $rooms = $conn->query("SELECT * FROM rooms ORDER BY RoomID ASC");
 $equipment = $conn->query("SELECT * FROM equipmentfacility ORDER BY EFID ASC");
 $personnel = $conn->query("SELECT * FROM personnels ORDER BY PersonnelId ASC");
-$services = $conn->query("SELECT * FROM services ORDER BY serviceID ASC");
+$services = $conn->query("SELECT * FROM services ORDER BY ServiceID ASC");
 ?>
 
 <!DOCTYPE html>
@@ -144,6 +144,7 @@ $services = $conn->query("SELECT * FROM services ORDER BY serviceID ASC");
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 
     <style>
+        /* Your existing CSS styles remain the same */
         body {
             margin: 0;
             font-family: 'Poppins', sans-serif;
@@ -152,7 +153,6 @@ $services = $conn->query("SELECT * FROM services ORDER BY serviceID ASC");
             overflow-x: hidden;
         }
 
-        /* Navbar styling - matching your existing style */
         .navbar {
             display: flex;
             align-items: center;
@@ -591,7 +591,7 @@ $services = $conn->query("SELECT * FROM services ORDER BY serviceID ASC");
                     </div>
                     <div class="modal-body">
                         <input type="hidden" name="action" value="edit_room">
-                        <input type="hidden" name="id" id="edit_room_id">
+                        <input type="hidden" name="RoomID" id="edit_room_RoomID"> <!-- Changed from 'id' to 'RoomID' -->
                         <div class="mb-3">
                             <label for="edit_roomname" class="form-label">Room Name</label>
                             <input type="text" class="form-control" id="edit_roomname" name="roomname" required>
@@ -748,7 +748,7 @@ $services = $conn->query("SELECT * FROM services ORDER BY serviceID ASC");
                     </div>
                     <div class="modal-body">
                         <input type="hidden" name="action" value="edit_service">
-                        <input type="hidden" name="serviceID" id="edit_service_id">
+                        <input type="hidden" name="ServiceID" id="edit_service_id"> <!-- Changed from 'serviceID' to 'ServiceID' -->
                         <div class="mb-3">
                             <label for="edit_service_name" class="form-label">Service Type</label>
                             <input type="text" class="form-control" id="edit_service_name" name="Service_type" required>
@@ -775,7 +775,10 @@ $services = $conn->query("SELECT * FROM services ORDER BY serviceID ASC");
                     <div class="modal-body">
                         <p>Are you sure you want to delete this item? This action cannot be undone.</p>
                         <input type="hidden" name="action" id="delete_action">
-                        <input type="hidden" name="id" id="delete_id">
+                        <input type="hidden" name="RoomID" id="delete_room_id"> <!-- Changed from 'id' to 'RoomID' -->
+                        <input type="hidden" name="EFID" id="delete_equipment_id">
+                        <input type="hidden" name="PersonnelId" id="delete_personnel_id">
+                        <input type="hidden" name="ServiceID" id="delete_service_id"> <!-- Changed from 'serviceID' to 'ServiceID' -->
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -799,7 +802,7 @@ $services = $conn->query("SELECT * FROM services ORDER BY serviceID ASC");
                     const roomname = this.getAttribute('data-roomname');
                     const building = this.getAttribute('data-building');
                     
-                    document.getElementById('edit_room_id').value = id;
+                    document.getElementById('edit_room_RoomID').value = id;
                     document.getElementById('edit_roomname').value = roomname;
                     document.getElementById('edit_building_name').value = building;
                     
@@ -815,7 +818,12 @@ $services = $conn->query("SELECT * FROM services ORDER BY serviceID ASC");
                     const id = this.getAttribute('data-id');
                     
                     document.getElementById('delete_action').value = 'delete_room';
-                    document.getElementById('delete_id').value = id;
+                    document.getElementById('delete_room_id').value = id; // Updated to use delete_room_id
+                    
+                    // Clear other ID fields
+                    document.getElementById('delete_equipment_id').value = '';
+                    document.getElementById('delete_personnel_id').value = '';
+                    document.getElementById('delete_service_id').value = '';
                     
                     const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
                     deleteModal.show();
@@ -844,7 +852,12 @@ $services = $conn->query("SELECT * FROM services ORDER BY serviceID ASC");
                     const id = this.getAttribute('data-id');
                     
                     document.getElementById('delete_action').value = 'delete_equipment';
-                    document.getElementById('delete_id').value = id;
+                    document.getElementById('delete_equipment_id').value = id;
+                    
+                    // Clear other ID fields
+                    document.getElementById('delete_room_id').value = '';
+                    document.getElementById('delete_personnel_id').value = '';
+                    document.getElementById('delete_service_id').value = '';
                     
                     const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
                     deleteModal.show();
@@ -873,7 +886,12 @@ $services = $conn->query("SELECT * FROM services ORDER BY serviceID ASC");
                     const id = this.getAttribute('data-id');
                     
                     document.getElementById('delete_action').value = 'delete_personnel';
-                    document.getElementById('delete_id').value = id;
+                    document.getElementById('delete_personnel_id').value = id;
+                    
+                    // Clear other ID fields
+                    document.getElementById('delete_room_id').value = '';
+                    document.getElementById('delete_equipment_id').value = '';
+                    document.getElementById('delete_service_id').value = '';
                     
                     const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
                     deleteModal.show();
@@ -902,7 +920,12 @@ $services = $conn->query("SELECT * FROM services ORDER BY serviceID ASC");
                     const id = this.getAttribute('data-id');
                     
                     document.getElementById('delete_action').value = 'delete_service';
-                    document.getElementById('delete_id').value = id;
+                    document.getElementById('delete_service_id').value = id;
+                    
+                    // Clear other ID fields
+                    document.getElementById('delete_room_id').value = '';
+                    document.getElementById('delete_equipment_id').value = '';
+                    document.getElementById('delete_personnel_id').value = '';
                     
                     const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
                     deleteModal.show();
