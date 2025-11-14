@@ -292,6 +292,24 @@ $stmt->close();
             font-style: italic;
         }
 
+        .attachment-btn {
+            background: #198754;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .attachment-btn:hover {
+            background: #146c43;
+        }
+
         .accordion-item.highlighted {
             background-color: #e8f5e8;
             border-left: 4px solid #1f9158;
@@ -310,6 +328,86 @@ $stmt->close();
             background-color: #e8f5e8;
             border-left: 4px solid #1f9158;
             animation: highlight 2s ease;
+        }
+
+        /* Attachment Modal Styles */
+        .attachment-modal .modal-dialog {
+            max-width: 100%;
+            width: 1000px;
+            max-height: 90vh;
+        }
+
+        .attachment-modal .modal-content {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .attachment-modal .modal-header {
+            background: linear-gradient(135deg, #087830, #3c4142);
+            color: white;
+            border-bottom: none;
+            padding: 15px 20px;
+        }
+
+        .attachment-modal .modal-title {
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .attachment-modal .modal-body {
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f8f9fa;
+            min-height: 400px;
+            max-height: 70vh;
+            overflow: hidden;
+        }
+
+        .attachment-modal .modal-footer {
+            border-top: 1px solid #dee2e6;
+            padding: 12px 20px;
+            background: white;
+        }
+
+        .attachment-image {
+            max-width: 100%;
+            max-height: 70vh;
+            object-fit: contain;
+            border-radius: 0;
+        }
+
+        .non-image-attachment {
+            padding: 40px 20px;
+            text-align: center;
+            color: #6c757d;
+            font-size: 16px;
+        }
+
+        .non-image-attachment i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: #198754;
+        }
+
+        .download-btn {
+            background: #198754;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .download-btn:hover {
+            background: #146c43;
+            color: white;
         }
 
         @keyframes highlight {
@@ -416,6 +514,16 @@ $stmt->close();
             .status-badge {
                 font-size: 11px;
                 padding: 5px 10px;
+            }
+
+            .attachment-modal .modal-dialog {
+                max-width: 95%;
+                margin: 10px auto;
+            }
+
+            .attachment-modal .modal-body {
+                min-height: 300px;
+                max-height: 60vh;
             }
         }
 
@@ -612,13 +720,23 @@ $stmt->close();
                                         <?php if (!empty($row['Attachment'])): ?>
                                             <?php 
                                             $attachment = htmlspecialchars($row['Attachment']);
-                                            if (preg_match('/\.(jpg|jpeg|png|gif|bmp)$/i', $attachment)): 
+                                            if (preg_match('/\.(jpg|jpeg|png|gif|bmp|webp)$/i', $attachment)): 
                                             ?>
-                                                <a href="<?= $attachment ?>" target="_blank" class="text-decoration-none">
-                                                    <i class="fas fa-image me-1"></i>View Image
-                                                </a>
+                                                <button type="button" class="attachment-btn" 
+                                                        data-bs-toggle="modal" 
+                                                        data-bs-target="#attachmentModal"
+                                                        data-attachment-url="<?= $attachment ?>"
+                                                        data-attachment-type="image">
+                                                    <i class="fas fa-image me-1"></i>View Attachment
+                                                </button>
                                             <?php else: ?>
-                                                <?= $attachment ?>
+                                                <button type="button" class="attachment-btn" 
+                                                        data-bs-toggle="modal" 
+                                                        data-bs-target="#attachmentModal"
+                                                        data-attachment-url="<?= $attachment ?>"
+                                                        data-attachment-type="file">
+                                                    <i class="fas fa-file me-1"></i>View Attachment
+                                                </button>
                                             <?php endif; ?>
                                         <?php else: ?>
                                             <span class="no-attachment">No attachment</span>
@@ -633,6 +751,27 @@ $stmt->close();
             <?php else: ?>
                 <div class="alert alert-info text-center">You have not submitted any concerns yet.</div>
             <?php endif; ?>
+        </div>
+    </div>
+
+    <!-- Attachment Modal -->
+    <div class="modal fade attachment-modal" id="attachmentModal" tabindex="-1" aria-labelledby="attachmentModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="attachmentModalLabel">Attachment Preview</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="attachmentModalBody">
+                    <!-- Content will be loaded dynamically -->
+                </div>
+                <div class="modal-footer">
+                    <a href="#" id="downloadAttachment" class="download-btn" target="_blank">
+                        <i class="fas fa-download me-1"></i> Download
+                    </a>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -670,6 +809,57 @@ $stmt->close();
                 document.body.style.overflow = '';
             }
         });
+
+        // Attachment Modal Handler
+        const attachmentModal = document.getElementById('attachmentModal');
+        if (attachmentModal) {
+            attachmentModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const attachmentUrl = button.getAttribute('data-attachment-url');
+                const attachmentType = button.getAttribute('data-attachment-type');
+                const modalBody = document.getElementById('attachmentModalBody');
+                const downloadLink = document.getElementById('downloadAttachment');
+                
+                // Set download link
+                downloadLink.href = attachmentUrl;
+                
+                // Clear previous content
+                modalBody.innerHTML = '';
+                
+                if (attachmentType === 'image') {
+                    // For images, show the image
+                    const img = document.createElement('img');
+                    img.src = attachmentUrl;
+                    img.alt = 'Attachment Preview';
+                    img.className = 'attachment-image';
+                    img.onload = function() {
+                        // Image loaded successfully
+                    };
+                    img.onerror = function() {
+                        // If image fails to load, show error message
+                        modalBody.innerHTML = `
+                            <div class="non-image-attachment">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <p>Unable to load image</p>
+                                <p class="small">The attachment may have been moved or deleted.</p>
+                            </div>
+                        `;
+                    };
+                    modalBody.appendChild(img);
+                } else {
+                    // For non-image files, show file icon and info
+                    const fileName = attachmentUrl.split('/').pop();
+                    modalBody.innerHTML = `
+                        <div class="non-image-attachment">
+                            <i class="fas fa-file"></i>
+                            <p>File Attachment</p>
+                            <p class="small">${fileName}</p>
+                            <p class="small text-muted">This file type cannot be previewed in the browser.</p>
+                        </div>
+                    `;
+                }
+            });
+        }
 
         // Handle both anchor navigation and open_concern parameter
         function autoOpenConcern() {

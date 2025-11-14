@@ -56,10 +56,11 @@ $userRow = $userResult->fetch_assoc();
 $accountID = $userRow ? $userRow['AccountID'] : 0;
 $stmt->close();
 
-// Fetch completed or cancelled concerns with feedback status
+// Fetch completed or cancelled concerns with feedback status and admin response
 $concernsQuery = "SELECT c.ConcernID, c.Concern_Title, c.Description, c.building_name, c.Room, 
                          c.Service_type, c.EFname, c.Assigned_to, c.Attachment, c.Status, c.Concern_Date,
-                         f.FeedbackID, f.Comments as FeedbackComments, f.Date_Submitted as FeedbackDate
+                         f.FeedbackID, f.Comments as FeedbackComments, f.Date_Submitted as FeedbackDate,
+                         f.Admin_Response, f.Date_Responded
                   FROM concerns c 
                   LEFT JOIN feedbacks f ON c.ConcernID = f.ConcernID AND f.AccountID = ?
                   WHERE c.AccountID = ? AND (c.Status = 'Completed' OR c.Status = 'Cancelled') 
@@ -285,6 +286,69 @@ body {
     gap: 8px;
 }
 
+/* Admin Response Styles - Now matching user feedback exactly */
+.admin-response-section {
+    margin-top: 15px;
+}
+
+.admin-response-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.admin-response-icon {
+    color: #0d6efd;
+    font-size: 16px;
+}
+
+.admin-response-title {
+    font-weight: bold;
+    color: #0d6efd;
+    font-size: 14px;
+}
+
+.admin-response-date {
+    color: #6c757d;
+    font-size: 12px;
+    margin-top: 5px;
+    margin-bottom: 8px;
+}
+
+.admin-response-text {
+    color: #495057;
+    margin-bottom: 0;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* Attachment Styles */
+.attachment-btn {
+    background: #198754;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.attachment-btn:hover {
+    background: #146c43;
+    color: white;
+}
+
+.attachment-btn i {
+    font-size: 14px;
+}
+
 /* Modal Styles */
 .modal-header {
     background: linear-gradient(135deg, #087830, #3c4142);
@@ -293,6 +357,85 @@ body {
 
 .modal-header .btn-close {
     filter: invert(1);
+}
+
+.image-modal .modal-dialog {
+    max-width: 100%;
+    width: 1000px;
+    max-height: 90vh;
+}
+
+.image-modal .modal-content {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.image-modal .modal-body {
+    text-align: center;
+    padding: 0;
+    background: #f8f9fa;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+    max-height: 70vh;
+}
+
+.image-modal img {
+    max-width: 100%;
+    max-height: 70vh;
+    object-fit: contain;
+    border-radius: 0;
+}
+
+.file-modal .modal-dialog {
+    max-width: 500px;
+}
+
+.file-modal .modal-body {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.file-icon {
+    font-size: 64px;
+    color: #6c757d;
+    margin-bottom: 20px;
+}
+
+.file-info {
+    margin-bottom: 20px;
+}
+
+.file-name {
+    font-weight: bold;
+    color: #495057;
+    margin-bottom: 5px;
+}
+
+.file-type {
+    color: #6c757d;
+    font-size: 14px;
+}
+
+.download-btn {
+    background: #198754;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.3s;
+    font-weight: 500;
+}
+
+.download-btn:hover {
+    background: #146c43;
+    color: white;
 }
 
 /* No attachment styling */
@@ -368,6 +511,16 @@ body {
         width: 100%;
         margin-top: 10px;
     }
+
+    .image-modal .modal-dialog {
+        max-width: 95%;
+        margin: 10px auto;
+    }
+
+    .image-modal .modal-body {
+        min-height: 300px;
+        max-height: 60vh;
+    }
 }
 
 @media (max-width: 576px) {
@@ -427,6 +580,12 @@ body {
     .status-badge {
         font-size: 11px;
         padding: 5px 10px;
+    }
+
+    .attachment-btn {
+        width: 100%;
+        justify-content: center;
+        margin-top: 8px;
     }
 }
 
@@ -495,6 +654,8 @@ body {
                     $date = date("l, d M Y", strtotime($row['Concern_Date']));
                     $hasFeedback = !empty($row['FeedbackID']);
                     $feedbackDate = $hasFeedback ? date('M d, Y', strtotime($row['FeedbackDate'])) : '';
+                    $hasAdminResponse = !empty($row['Admin_Response']);
+                    $adminResponseDate = $hasAdminResponse ? date('M d, Y', strtotime($row['Date_Responded'])) : '';
             ?>
                 <div class="accordion-item">
                     <h2 class="accordion-header">
@@ -564,20 +725,30 @@ body {
                                 <div class="form-control"><?= !empty($row['Assigned_to']) ? htmlspecialchars($row['Assigned_to']) : 'Not assigned yet' ?></div>
                             </div>
                             
-                            <!-- Attachment - Always show this field -->
+                            <!-- Attachment - Simple green button -->
                             <div class="form-field">
                                 <label>Attachment</label>
                                 <div class="form-control">
-                                    <?php if (!empty($row['Attachment'])): ?>
-                                        <?php 
+                                    <?php if (!empty($row['Attachment'])): 
                                         $attachment = htmlspecialchars($row['Attachment']);
-                                        if (preg_match('/\.(jpg|jpeg|png|gif|bmp)$/i', $attachment)): 
-                                        ?>
-                                            <a href="<?= $attachment ?>" target="_blank" class="text-decoration-none">
-                                                <i class="fas fa-image me-1"></i>View Image
-                                            </a>
+                                        $fileExtension = strtolower(pathinfo($attachment, PATHINFO_EXTENSION));
+                                        $isImage = in_array($fileExtension, ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp']);
+                                        $fileName = basename($attachment);
+                                    ?>
+                                        <?php if ($isImage): ?>
+                                            <button type="button" class="attachment-btn" 
+                                                    data-bs-toggle="modal" data-bs-target="#imageModal"
+                                                    onclick="openImageModal('<?= $attachment ?>', '<?= $fileName ?>')">
+                                                <i class="fas fa-paperclip"></i>
+                                                View Attachment
+                                            </button>
                                         <?php else: ?>
-                                            <?= $attachment ?>
+                                            <button type="button" class="attachment-btn" 
+                                                    data-bs-toggle="modal" data-bs-target="#fileModal"
+                                                    onclick="openFileModal('<?= $attachment ?>', '<?= $fileName ?>', '<?= strtoupper($fileExtension) ?>')">
+                                                <i class="fas fa-paperclip"></i>
+                                                View Attachment (<?= strtoupper($fileExtension) ?>)
+                                            </button>
                                         <?php endif; ?>
                                     <?php else: ?>
                                         <span class="no-attachment">No attachment</span>
@@ -585,11 +756,12 @@ body {
                                 </div>
                             </div>
 
-                            <!-- Feedback Section -->
+                            <!-- Feedback Section - Combined with Admin Response -->
                             <div class="form-field">
                                 <label>Feedback Status</label>
                                 <div class="form-control">
                                     <?php if ($hasFeedback): ?>
+                                        <!-- User Feedback Section -->
                                         <div class="feedback-submitted-text">
                                             <i class="fas fa-check-circle text-success"></i>
                                             <span>Feedback submitted on <?= $feedbackDate ?></span>
@@ -598,6 +770,30 @@ body {
                                             <div class="mt-2 p-2 bg-light rounded">
                                                 <strong>Your feedback:</strong>
                                                 <p class="mb-0"><?= htmlspecialchars($row['FeedbackComments']) ?></p>
+                                            </div>
+                                        <?php endif; ?>
+
+                                        <!-- Admin Response - Integrated in same section -->
+                                        <?php if ($hasAdminResponse): ?>
+                                            <div class="admin-response-section">
+                                                <div class="admin-response-header">
+                                                    <i class="fas fa-user-shield admin-response-icon"></i>
+                                                    <span class="admin-response-title">Admin Response</span>
+                                                </div>
+                                                <?php if ($adminResponseDate): ?>
+                                                    <div class="admin-response-date">
+                                                        Responded on: <?= $adminResponseDate ?>
+                                                    </div>
+                                                <?php endif; ?>
+                                                <div class="mt-2 p-2 bg-light rounded">
+                                                    <strong>Admin Response:</strong>
+                                                    <p class="admin-response-text mb-0"><?= htmlspecialchars($row['Admin_Response']) ?></p>
+                                                </div>
+                                            </div>
+                                        <?php else: ?>
+                                            <div class="mt-2 text-muted">
+                                                <i class="fas fa-clock me-1"></i>
+                                                Waiting for admin response...
                                             </div>
                                         <?php endif; ?>
                                     <?php else: ?>
@@ -660,6 +856,55 @@ body {
     </div>
 </div>
 
+<!-- Image Preview Modal -->
+<div class="modal fade image-modal" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageModalLabel">Attachment Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <img id="modalImage" src="" alt="Concern Attachment" class="img-fluid">
+            </div>
+            <div class="modal-footer">
+                <a href="#" id="downloadImage" class="download-btn">
+                    <i class="fas fa-download me-1"></i> Download Image
+                </a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- File Preview Modal -->
+<div class="modal fade file-modal" id="fileModal" tabindex="-1" aria-labelledby="fileModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="fileModalLabel">File Attachment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="file-icon">
+                    <i class="fas fa-file"></i>
+                </div>
+                <div class="file-info">
+                    <div class="file-name" id="fileName"></div>
+                    <div class="file-type" id="fileType"></div>
+                </div>
+                <p class="text-muted">This file type cannot be previewed in the browser.</p>
+            </div>
+            <div class="modal-footer">
+                <a href="#" id="downloadFile" class="download-btn">
+                    <i class="fas fa-download me-1"></i> Download File
+                </a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 
@@ -673,6 +918,21 @@ feedbackModal.addEventListener('show.bs.modal', function (event) {
     // Set the concern ID in the hidden input
     document.getElementById('modalConcernID').value = concernId;
 });
+
+// Handle image preview modal
+function openImageModal(imageSrc, fileName) {
+    document.getElementById('modalImage').src = imageSrc;
+    document.getElementById('downloadImage').href = imageSrc;
+    document.getElementById('imageModalLabel').textContent = 'Preview: ' + fileName;
+}
+
+// Handle file preview modal
+function openFileModal(fileUrl, fileName, fileType) {
+    document.getElementById('fileName').textContent = fileName;
+    document.getElementById('fileType').textContent = 'File type: ' + fileType;
+    document.getElementById('downloadFile').href = fileUrl;
+    document.getElementById('fileModalLabel').textContent = 'File: ' + fileName;
+}
 
 // Handle form submission with AJAX
 document.getElementById('feedbackForm').addEventListener('submit', function(e) {
