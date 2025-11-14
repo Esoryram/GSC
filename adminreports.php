@@ -45,15 +45,13 @@ if ($generateClicked) {
     $query = "
         SELECT 
             c.ConcernID,
-            c.Concern_Title,
+            c.Description,
             c.Room,
             c.Service_type,
             c.Concern_Date,
             c.Status,
-            a.Name AS ReportedBy,
             c.Assigned_to
         FROM Concerns c
-        LEFT JOIN Accounts a ON c.AccountID = a.AccountID
         WHERE 1=1
     ";
 
@@ -79,6 +77,8 @@ if ($generateClicked) {
 
     if ($result) {
         while ($row = mysqli_fetch_assoc($result)) {
+            // Format the date to "Nov 14, 2025" format
+            $row['Formatted_Date'] = date('M j, Y', strtotime($row['Concern_Date']));
             $concernsData[] = $row;
         }
     }
@@ -429,12 +429,11 @@ if ($generateClicked) {
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Title</th>
+                            <th>Description</th>
                             <th>Room</th>
                             <th>Type</th>
                             <th>Concern Date</th>
                             <th>Status</th>
-                            <th>Reported By</th>
                             <th>Assigned</th>
                         </tr>
                     </thead>
@@ -443,10 +442,10 @@ if ($generateClicked) {
                             <?php foreach ($concernsData as $row): ?>
                                 <tr>
                                     <td><?= $row['ConcernID']; ?></td>
-                                    <td><?= htmlspecialchars($row['Concern_Title']); ?></td>
+                                    <td><?= htmlspecialchars($row['Description']); ?></td>
                                     <td><?= htmlspecialchars($row['Room']); ?></td>
                                     <td><?= htmlspecialchars($row['Service_type']); ?></td>
-                                    <td><?= htmlspecialchars($row['Concern_Date']); ?></td>
+                                    <td><?= $row['Formatted_Date']; ?></td>
                                     <td>
                                         <?php 
                                             $statusClass = '';
@@ -472,13 +471,12 @@ if ($generateClicked) {
                                             <?= htmlspecialchars($row['Status']); ?>
                                         </span>
                                     </td>
-                                    <td><?= htmlspecialchars($row['ReportedBy']); ?></td>
                                     <td><?= htmlspecialchars($row['Assigned_to']); ?></td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="9" class="text-center text-muted py-4">
+                                <td colspan="7" class="text-center text-muted py-4">
                                     No concerns found matching the current filters.
                                 </td>
                             </tr>
