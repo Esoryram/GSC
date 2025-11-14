@@ -126,7 +126,6 @@ $stmt->close();
             background: #107040;
         }
 
-        /* FIXED: Better mobile menu toggle */
         .navbar-toggler {
             display: none;
             background: transparent;
@@ -139,7 +138,6 @@ $stmt->close();
             cursor: pointer;
         }
 
-        /* FIXED: Dropdown Menu for touch - UPDATED TO KEEP WHITE TEXT */
         .dropdown {
             position: relative;
         }
@@ -224,7 +222,6 @@ $stmt->close();
             transition: all 0.3s ease;
         }
 
-        /* FIXED: Better accordion buttons for touch */
         .accordion-button {
             background: linear-gradient(135deg, #087830, #3c4142);
             color: white;
@@ -305,12 +302,10 @@ $stmt->close();
             background: linear-gradient(90deg, #1f9158, #163a37);
         }
 
-        /* Smooth transitions for accordion */
         .accordion-collapse {
             transition: all 0.3s ease;
         }
 
-        /* Anchor highlight styles */
         .accordion-item:target {
             background-color: #e8f5e8;
             border-left: 4px solid #1f9158;
@@ -328,7 +323,6 @@ $stmt->close();
             }
         }
 
-        /* FIXED: Mobile Responsive - iPhone 12 Pro is 390px wide */
         @media (max-width: 480px) {
             .navbar {
                 padding: 10px 12px;
@@ -416,7 +410,7 @@ $stmt->close();
             }
             
             .form-field .form-control {
-                font-size: 16px; /* FIXED: Prevent zoom on iOS */
+                font-size: 16px; 
             }
             
             .status-badge {
@@ -425,7 +419,6 @@ $stmt->close();
             }
         }
 
-        /* FIXED: Specific media query for iPhone 12 Pro (390px) */
         @media (max-width: 390px) {
             .navbar .links a {
                 font-size: 14px;
@@ -451,7 +444,6 @@ $stmt->close();
             }
         }
 
-        /* FIXED: Better tablet styles */
         @media (min-width: 481px) and (max-width: 768px) {
             .navbar {
                 padding: 12px 15px;
@@ -472,7 +464,6 @@ $stmt->close();
             }
         }
 
-        /* FIXED: Scrollbar for WebKit (iOS) */
         .concern-container::-webkit-scrollbar {
             width: 6px;
         }

@@ -31,7 +31,6 @@ include("config.php");
             overflow: hidden;
         }
 
-        /* Background pattern */
         body::before {
             content: "";
             position: absolute;
@@ -63,9 +62,8 @@ include("config.php");
             text-align: center;
         }
 
-        /* Logo sizing - Adjust these values as needed */
         header img {
-            max-width: 250px; /* Change this value to resize */
+            max-width: 250px; 
             height: auto;
             display: block;
             margin: 0 auto;
@@ -102,7 +100,6 @@ include("config.php");
             color: white;
         }
 
-        /* Same admin color for both cards */
         .admin .card-header,
         .user .card-header {
             background: linear-gradient(135deg, #3c4142 0%, #087830 100%);
@@ -147,7 +144,6 @@ include("config.php");
             text-decoration: none;
         }
 
-        /* Same admin button color for both */
         .admin .login-btn,
         .user .login-btn {
             background: #3c4142;
@@ -167,7 +163,6 @@ include("config.php");
             font-size: 0.9rem;
         }
 
-        /* Responsive design */
         @media (max-width: 768px) {
             .login-options {
                 flex-direction: column;

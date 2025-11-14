@@ -157,7 +157,7 @@ while ($eq = $equipment_result->fetch_assoc()) {
             position: absolute;
             top: 100%;
             right: 0;
-            background: white;
+            background: linear-gradient(135deg, #087830, #3c4142);
             min-width: 180px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
             border-radius: 5px;
@@ -173,7 +173,7 @@ while ($eq = $equipment_result->fetch_assoc()) {
             display: block;
             padding: 12px 16px;
             text-decoration: none;
-            color: #333;
+            color: white;
             font-size: 14px;
         }
 
@@ -216,6 +216,10 @@ while ($eq = $equipment_result->fetch_assoc()) {
 
         .table-container {
             margin: 0 40px 40px 40px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
 
         .assign-btn {
@@ -236,7 +240,24 @@ while ($eq = $equipment_result->fetch_assoc()) {
             background-color: #157347;
         }
 
-        /* Custom select styling for modal */
+        .update-btn {
+            font-size: 13px;
+            padding: 6px 16px;
+            border-radius: 6px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100px;
+            transition: 0.3s;
+            text-align: center;
+            background-color: #0d6efd;
+            color: white;
+        }
+
+        .update-btn:hover {
+            background-color: #0b5ed7;
+        }
+
         .custom-select {
             position: relative;
             user-select: none;
@@ -430,6 +451,12 @@ while ($eq = $equipment_result->fetch_assoc()) {
             margin-bottom: 8px;
             color: #495057;
         }
+
+        /* UPDATED: Modal header gradient */
+        .modal-header-gradient {
+            background: linear-gradient(135deg, #087830, #3c4142) !important;
+            color: white;
+        }
     </style>
 </head>
 
@@ -527,6 +554,10 @@ while ($eq = $equipment_result->fetch_assoc()) {
 
                             $assignedName = trim($row['Assigned_to']);
                             $displayAssigned = empty($assignedName) ? 'Not Assigned' : htmlspecialchars($assignedName);
+                            
+                            // Determine button text and class based on whether concern is already assigned
+                            $buttonText = empty($assignedName) ? 'Assign' : 'Update';
+                            $buttonClass = empty($assignedName) ? 'assign-btn' : 'update-btn';
                     ?>
                     <tr>
                         <td><?php echo $row['ConcernID']; ?></td>
@@ -543,7 +574,7 @@ while ($eq = $equipment_result->fetch_assoc()) {
                         <td><?php echo $displayAssigned; ?></td>
                         <td>
                             <button 
-                                class="assign-btn" 
+                                class="<?php echo $buttonClass; ?>" 
                                 data-bs-toggle="modal" 
                                 data-bs-target="#assignModal"
                                 data-concernid="<?php echo $row['ConcernID']; ?>"
@@ -556,8 +587,9 @@ while ($eq = $equipment_result->fetch_assoc()) {
                                 data-service="<?php echo htmlspecialchars($row['Service_type']); ?>"
                                 data-equipment="<?php echo htmlspecialchars($row['EFname']); ?>"
                                 data-attachment="<?php echo htmlspecialchars($row['Attachment']); ?>"
-                                data-building="<?php echo htmlspecialchars($row['building_name']); ?>">
-                                Assign
+                                data-building="<?php echo htmlspecialchars($row['building_name']); ?>"
+                                data-isassigned="<?php echo empty($assignedName) ? 'false' : 'true'; ?>">
+                                <?php echo $buttonText; ?>
                             </button>
                         </td>
                     </tr>
@@ -583,7 +615,8 @@ while ($eq = $equipment_result->fetch_assoc()) {
     <div class="modal fade" id="assignModal" tabindex="-1" aria-labelledby="assignModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
-                <div class="modal-header bg-success text-white">
+                <!-- UPDATED: Changed from bg-success to custom gradient -->
+                <div class="modal-header modal-header-gradient">
                     <h5 class="modal-title" id="assignModalLabel">
                         <i class="fas fa-user-check me-2"></i>Manage Concern
                     </h5>
@@ -1023,6 +1056,7 @@ while ($eq = $equipment_result->fetch_assoc()) {
         const equipment = button.getAttribute('data-equipment');
         const attachment = button.getAttribute('data-attachment');
         const building = button.getAttribute('data-building');
+        const isAssigned = button.getAttribute('data-isassigned') === 'true';
 
         // Update modal content
         document.getElementById('modalConcernID').textContent = concernId;
@@ -1170,18 +1204,90 @@ while ($eq = $equipment_result->fetch_assoc()) {
             attachmentBtn.disabled = true;
             attachmentBtn.style.opacity = '0.6';
         }
+
+        // Update modal title based on whether concern is already assigned
+        const modalTitle = document.getElementById('assignModalLabel');
+        if (isAssigned) {
+            modalTitle.innerHTML = '<i class="fas fa-edit me-2"></i>Update Concern';
+        } else {
+            modalTitle.innerHTML = '<i class="fas fa-user-check me-2"></i>Assign Concern';
+        }
     });
 
-    // Form validation
+    // Form submission with SweetAlert2
     const assignForm = document.getElementById('assignForm');
     assignForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+
         const assignedTo = document.getElementById('assignedToInput').value;
         const status = document.getElementById('statusInput').value;
 
         if (!assignedTo || !status) {
-            e.preventDefault();
-            alert('Please select both personnel and status before submitting.');
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                text: 'Please select both personnel and status before submitting.',
+                confirmButtonColor: '#198754'
+            });
+            return;
         }
+
+        // Show loading state
+        Swal.fire({
+            title: 'Updating Concern...',
+            text: 'Please wait while we update the concern.',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        // Prepare form data
+        const formData = new FormData(assignForm);
+
+        // Send AJAX request
+        fetch('update_concern.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            Swal.close();
+            
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: data.message,
+                    confirmButtonColor: '#198754',
+                    confirmButtonText: 'OK'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Close modal and refresh page
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('assignModal'));
+                        modal.hide();
+                        location.reload();
+                    }
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: data.message,
+                    confirmButtonColor: '#198754'
+                });
+            }
+        })
+        .catch(error => {
+            Swal.close();
+            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Network Error',
+                text: 'An error occurred while updating the concern. Please try again.',
+                confirmButtonColor: '#198754'
+            });
+        });
     });
 
     // Close dropdowns when clicking elsewhere

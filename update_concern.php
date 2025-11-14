@@ -1,65 +1,66 @@
 <?php
 session_start();
 include("config.php");
+header('Content-Type: application/json');
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $concern_id = $_POST['concern_id'];
-    $title = $_POST['title'];
-    $description = $_POST['description'];
-    $status = $_POST['status'];
-    $assigned_to = $_POST['assigned_to'];
+// Check if user is logged in
+if (!isset($_SESSION['username'])) {
+    echo json_encode(['success' => false, 'message' => 'User not logged in.']);
+    exit;
+}
+
+$concern_id = $_POST['concern_id'] ?? '';
+$assigned_to = $_POST['assigned_to'] ?? '';
+$status = $_POST['status'] ?? '';
+$building = $_POST['building'] ?? '';
+$room = $_POST['room'] ?? '';
+$service_type = $_POST['service_type'] ?? '';
+$equipment = $_POST['equipment'] ?? '';
+
+// Handle "Other" fields
+if (isset($_POST['other_building']) && !empty($_POST['other_building'])) {
+    $building = $_POST['other_building'];
+}
+
+if (isset($_POST['other_room']) && !empty($_POST['other_room'])) {
+    $room = $_POST['other_room'];
+}
+
+if (isset($_POST['other_service']) && !empty($_POST['other_service'])) {
+    $service_type = $_POST['other_service'];
+}
+
+if (isset($_POST['other_equipment']) && !empty($_POST['other_equipment'])) {
+    $equipment = $_POST['other_equipment'];
+}
+
+if (!$concern_id || !$assigned_to || !$status) {
+    echo json_encode(['success' => false, 'message' => 'Please provide all required fields.']);
+    exit;
+}
+
+try {
+    // Update concern in database
+    $stmt = $conn->prepare("UPDATE Concerns SET Assigned_to = ?, Status = ?, building_name = ?, Room = ?, Service_type = ?, EFname = ? WHERE ConcernID = ?");
     
-    // Handle building - use custom if provided
-    $building = $_POST['building'];
-    if ($building === 'Other' && !empty($_POST['other_building'])) {
-        $building = $_POST['other_building'];
+    if (!$stmt) {
+        throw new Exception('Database preparation failed: ' . $conn->error);
     }
-    
-    // Handle room - use custom if provided
-    $room = $_POST['room'];
-    if ($room === 'Other' && !empty($_POST['other_room'])) {
-        $room = $_POST['other_room'];
-    }
-    
-    // Handle service type - use custom if provided
-    $service_type = $_POST['service_type'];
-    if ($service_type === 'Other' && !empty($_POST['other_service'])) {
-        $service_type = $_POST['other_service'];
-    }
-    
-    // Handle equipment - combine checkboxes and custom
-    $equipment = $_POST['equipment'];
-    if (!empty($_POST['other_equipment'])) {
-        $other_equipment = $_POST['other_equipment'];
-        if (!empty($equipment)) {
-            $equipment .= ', ' . $other_equipment;
-        } else {
-            $equipment = $other_equipment;
-        }
-    }
-    
-    // Update the concern in database
-    $query = "UPDATE Concerns SET 
-        Concern_Title = ?,
-        Room = ?,
-        Service_type = ?,
-        Status = ?,
-        Assigned_to = ?,
-        Description = ?,
-        EFname = ?
-        WHERE ConcernID = ?";
-    
-    $stmt = $conn->prepare($query);
-    $stmt->bind_param("sssssssi", $title, $room, $service_type, $status, $assigned_to, $description, $equipment, $concern_id);
-    
+
+    $stmt->bind_param("ssssssi", $assigned_to, $status, $building, $room, $service_type, $equipment, $concern_id);
+
     if ($stmt->execute()) {
-        $_SESSION['success'] = "Concern updated successfully!";
+        echo json_encode(['success' => true, 'message' => 'Concern updated successfully!']);
     } else {
-        $_SESSION['error'] = "Error updating concern: " . $conn->error;
+        throw new Exception('Failed to update concern: ' . $stmt->error);
     }
     
     $stmt->close();
-    header("Location: adminconcerns.php");
-    exit();
+    
+} catch (Exception $e) {
+    error_log("Concern update error: " . $e->getMessage());
+    echo json_encode(['success' => false, 'message' => 'Database error occurred: ' . $e->getMessage()]);
 }
+
+$conn->close();
 ?>

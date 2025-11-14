@@ -17,118 +17,178 @@ $activeTab = isset($_SESSION['active_data_tab']) ? $_SESSION['active_data_tab'] 
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['action'])) {
-        switch ($_POST['action']) {
-            case 'add_room':
-                $roomname = $_POST['roomname'];
-                $building_name = $_POST['building_name'];
-                $date_added = date('Y-m-d');
-                
-                $stmt = $conn->prepare("INSERT INTO rooms (roomname, building_name, date_added) VALUES (?, ?, ?)");
-                $stmt->bind_param("sss", $roomname, $building_name, $date_added);
-                $stmt->execute();
-                break;
-                
-            case 'edit_room':
-                $RoomID = $_POST['RoomID']; // Changed from 'id' to 'RoomID'
-                $roomname = $_POST['roomname'];
-                $building_name = $_POST['building_name'];
-                
-                $stmt = $conn->prepare("UPDATE rooms SET roomname = ?, building_name = ? WHERE RoomID = ?");
-                $stmt->bind_param("ssi", $roomname, $building_name, $RoomID);
-                $stmt->execute();
-                break;
-                
-            case 'delete_room':
-                $RoomID = $_POST['RoomID']; // Changed from 'id' to 'RoomID'
-                $stmt = $conn->prepare("DELETE FROM rooms WHERE RoomID = ?");
-                $stmt->bind_param("i", $RoomID);
-                $stmt->execute();
-                break;
-                
-            case 'add_equipment':
-                $EFname = $_POST['EFname'];
-                
-                $stmt = $conn->prepare("INSERT INTO equipmentfacility (EFname) VALUES (?)");
-                $stmt->bind_param("s", $EFname);
-                $stmt->execute();
-                break;
-                
-            case 'edit_equipment':
-                $EFID = $_POST['EFID'];
-                $EFname = $_POST['EFname'];
-                
-                $stmt = $conn->prepare("UPDATE equipmentfacility SET EFname = ? WHERE EFID = ?");
-                $stmt->bind_param("si", $EFname, $EFID);
-                $stmt->execute();
-                break;
-                
-            case 'delete_equipment':
-                $EFID = $_POST['EFID'];
-                $stmt = $conn->prepare("DELETE FROM equipmentfacility WHERE EFID = ?");
-                $stmt->bind_param("i", $EFID);
-                $stmt->execute();
-                break;
-                
-            case 'add_personnel':
-                $name = $_POST['name'];
-                
-                $stmt = $conn->prepare("INSERT INTO personnels (name) VALUES (?)");
-                $stmt->bind_param("s", $name);
-                $stmt->execute();
-                break;
-                
-            case 'edit_personnel':
-                $PersonnelId = $_POST['PersonnelId'];
-                $name = $_POST['name'];
-                
-                $stmt = $conn->prepare("UPDATE personnels SET name = ? WHERE PersonnelId = ?");
-                $stmt->bind_param("si", $name, $PersonnelId);
-                $stmt->execute();
-                break;
-                
-            case 'delete_personnel':
-                $PersonnelId = $_POST['PersonnelId'];
-                $stmt = $conn->prepare("DELETE FROM personnels WHERE PersonnelId = ?");
-                $stmt->bind_param("i", $PersonnelId);
-                $stmt->execute();
-                break;
-                
-            case 'add_service':
-                $Service_type = $_POST['Service_type'];
-                
-                $stmt = $conn->prepare("INSERT INTO services (Service_type) VALUES (?)");
-                $stmt->bind_param("s", $Service_type);
-                $stmt->execute();
-                break;
-                
-            case 'edit_service':
-                $ServiceID = $_POST['ServiceID']; // Changed from 'serviceID' to 'ServiceID'
-                $Service_type = $_POST['Service_type'];
-                
-                $stmt = $conn->prepare("UPDATE services SET Service_type = ? WHERE ServiceID = ?");
-                $stmt->bind_param("si", $Service_type, $ServiceID);
-                $stmt->execute();
-                break;
-                
-            case 'delete_service':
-                $ServiceID = $_POST['ServiceID']; // Changed from 'serviceID' to 'ServiceID'
-                $stmt = $conn->prepare("DELETE FROM services WHERE ServiceID = ?");
-                $stmt->bind_param("i", $ServiceID);
-                $stmt->execute();
-                break;
+        $success = false;
+        $message = '';
+        
+        try {
+            switch ($_POST['action']) {
+                case 'add_room':
+                    $roomname = $_POST['roomname'];
+                    $building_name = $_POST['building_name'];
+                    
+                    $stmt = $conn->prepare("INSERT INTO rooms (roomname, building_name) VALUES (?, ?)");
+                    $stmt->bind_param("ss", $roomname, $building_name);
+                    if ($stmt->execute()) {
+                        $success = true;
+                        $message = 'Room added successfully!';
+                    }
+                    break;
+                    
+                case 'edit_room':
+                    $RoomID = $_POST['RoomID'];
+                    $roomname = $_POST['roomname'];
+                    $building_name = $_POST['building_name'];
+                    
+                    $stmt = $conn->prepare("UPDATE rooms SET roomname = ?, building_name = ? WHERE RoomID = ?");
+                    $stmt->bind_param("ssi", $roomname, $building_name, $RoomID);
+                    if ($stmt->execute()) {
+                        $success = true;
+                        $message = 'Room updated successfully!';
+                    }
+                    break;
+                    
+                case 'delete_room':
+                    $RoomID = $_POST['RoomID'];
+                    $stmt = $conn->prepare("DELETE FROM rooms WHERE RoomID = ?");
+                    $stmt->bind_param("i", $RoomID);
+                    if ($stmt->execute()) {
+                        $success = true;
+                        $message = 'Room deleted successfully!';
+                    }
+                    break;
+                    
+                case 'add_equipment':
+                    $EFname = $_POST['EFname'];
+                    
+                    $stmt = $conn->prepare("INSERT INTO equipmentfacility (EFname) VALUES (?)");
+                    $stmt->bind_param("s", $EFname);
+                    if ($stmt->execute()) {
+                        $success = true;
+                        $message = 'Equipment/Facility added successfully!';
+                    }
+                    break;
+                    
+                case 'edit_equipment':
+                    $EFID = $_POST['EFID'];
+                    $EFname = $_POST['EFname'];
+                    
+                    $stmt = $conn->prepare("UPDATE equipmentfacility SET EFname = ? WHERE EFID = ?");
+                    $stmt->bind_param("si", $EFname, $EFID);
+                    if ($stmt->execute()) {
+                        $success = true;
+                        $message = 'Equipment/Facility updated successfully!';
+                    }
+                    break;
+                    
+                case 'delete_equipment':
+                    $EFID = $_POST['EFID'];
+                    $stmt = $conn->prepare("DELETE FROM equipmentfacility WHERE EFID = ?");
+                    $stmt->bind_param("i", $EFID);
+                    if ($stmt->execute()) {
+                        $success = true;
+                        $message = 'Equipment/Facility deleted successfully!';
+                    }
+                    break;
+                    
+                case 'add_personnel':
+                    $name = $_POST['name'];
+                    
+                    $stmt = $conn->prepare("INSERT INTO personnels (name) VALUES (?)");
+                    $stmt->bind_param("s", $name);
+                    if ($stmt->execute()) {
+                        $success = true;
+                        $message = 'Personnel added successfully!';
+                    }
+                    break;
+                    
+                case 'edit_personnel':
+                    $PersonnelId = $_POST['PersonnelId'];
+                    $name = $_POST['name'];
+                    
+                    $stmt = $conn->prepare("UPDATE personnels SET name = ? WHERE PersonnelId = ?");
+                    $stmt->bind_param("si", $name, $PersonnelId);
+                    if ($stmt->execute()) {
+                        $success = true;
+                        $message = 'Personnel updated successfully!';
+                    }
+                    break;
+                    
+                case 'delete_personnel':
+                    $PersonnelId = $_POST['PersonnelId'];
+                    $stmt = $conn->prepare("DELETE FROM personnels WHERE PersonnelId = ?");
+                    $stmt->bind_param("i", $PersonnelId);
+                    if ($stmt->execute()) {
+                        $success = true;
+                        $message = 'Personnel deleted successfully!';
+                    }
+                    break;
+                    
+                case 'add_service':
+                    $Service_type = $_POST['Service_type'];
+                    
+                    $stmt = $conn->prepare("INSERT INTO services (Service_type) VALUES (?)");
+                    $stmt->bind_param("s", $Service_type);
+                    if ($stmt->execute()) {
+                        $success = true;
+                        $message = 'Service added successfully!';
+                    }
+                    break;
+                    
+                case 'edit_service':
+                    $ServiceID = $_POST['ServiceID'];
+                    $Service_type = $_POST['Service_type'];
+                    
+                    $stmt = $conn->prepare("UPDATE services SET Service_type = ? WHERE ServiceID = ?");
+                    $stmt->bind_param("si", $Service_type, $ServiceID);
+                    if ($stmt->execute()) {
+                        $success = true;
+                        $message = 'Service updated successfully!';
+                    }
+                    break;
+                    
+                case 'delete_service':
+                    $ServiceID = $_POST['ServiceID'];
+                    $stmt = $conn->prepare("DELETE FROM services WHERE ServiceID = ?");
+                    $stmt->bind_param("i", $ServiceID);
+                    if ($stmt->execute()) {
+                        $success = true;
+                        $message = 'Service deleted successfully!';
+                    }
+                    break;
+            }
+            
+            // Store success status and message in session for SweetAlert
+            $_SESSION['alert'] = [
+                'success' => $success,
+                'message' => $success ? $message : 'Operation failed. Please try again.',
+                'active_tab' => $_POST['active_tab'] ?? $activeTab
+            ];
+            
+        } catch (Exception $e) {
+            $_SESSION['alert'] = [
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage(),
+                'active_tab' => $_POST['active_tab'] ?? $activeTab
+            ];
         }
         
-        // Refresh page to show updated data
+        // Redirect back to maintain state
         header("Location: system_data.php");
         exit();
     }
 }
 
+// Store current tab in session when navigating
+if (isset($_GET['tab'])) {
+    $_SESSION['active_data_tab'] = $_GET['tab'];
+    $activeTab = $_SESSION['active_data_tab'];
+}
+
 // Fetch data for display
-$rooms = $conn->query("SELECT * FROM rooms ORDER BY RoomID ASC");
-$equipment = $conn->query("SELECT * FROM equipmentfacility ORDER BY EFID ASC");
-$personnel = $conn->query("SELECT * FROM personnels ORDER BY PersonnelId ASC");
-$services = $conn->query("SELECT * FROM services ORDER BY ServiceID ASC");
+$rooms = $conn->query("SELECT * FROM rooms ORDER BY RoomID DESC");
+$equipment = $conn->query("SELECT * FROM equipmentfacility ORDER BY EFID DESC");
+$personnel = $conn->query("SELECT * FROM personnels ORDER BY PersonnelId DESC");
+$services = $conn->query("SELECT * FROM services ORDER BY ServiceID DESC");
 ?>
 
 <!DOCTYPE html>
@@ -144,11 +204,10 @@ $services = $conn->query("SELECT * FROM services ORDER BY ServiceID ASC");
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 
     <style>
-        /* Your existing CSS styles remain the same */
         body {
             margin: 0;
             font-family: 'Poppins', sans-serif;
-            font-weight: 600;
+            font-weight: 400;
             background: #f9fafb;
             overflow-x: hidden;
         }
@@ -186,7 +245,7 @@ $services = $conn->query("SELECT * FROM services ORDER BY ServiceID ASC");
         .navbar .links a {
             color: white; 
             text-decoration: none;
-            font-weight: bold; 
+            font-weight: 600;
             font-size: 14px;
             padding: 8px 12px; 
             border-radius: 5px;
@@ -224,7 +283,7 @@ $services = $conn->query("SELECT * FROM services ORDER BY ServiceID ASC");
             position: absolute;
             top: 100%;
             right: 0;
-            background: white;
+            background: linear-gradient(135deg, #087830, #3c4142);
             min-width: 180px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
             border-radius: 5px;
@@ -240,15 +299,16 @@ $services = $conn->query("SELECT * FROM services ORDER BY ServiceID ASC");
             display: block;
             padding: 12px 16px;
             text-decoration: none;
-            color: #333;
+            color: white;
             font-size: 14px;
+            font-weight: 400;
         }
 
         .dropdown .username-btn {
             color: white !important;
             background: none !important;
             border: none !important;
-            font-weight: bold;
+            font-weight: 600;
             font-size: 16px;
         }
 
@@ -257,44 +317,111 @@ $services = $conn->query("SELECT * FROM services ORDER BY ServiceID ASC");
             gap: 30px;
         }
 
+        /* Scrollable table container */
         .table-responsive {
             border-radius: 8px;
             overflow: hidden;
             border: 1px solid #e5e7eb;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .table-responsive table {
+            margin-bottom: 0;
         }
 
         .table thead {
-            background-color: #f3f4f6;
-            color: #374151;
+            background-color: #198754;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .table thead th {
+            border-bottom: none;
             font-weight: 600;
+            padding: 12px 8px;
+        }
+
+        .table tbody td {
+            padding: 10px 8px;
+            font-weight: 400;
+            vertical-align: middle;
         }
 
         .nav-tabs .nav-link {
             color: #495057;
             font-weight: 500;
+            border: none;
+            padding: 12px 20px;
         }
 
         .nav-tabs .nav-link.active {
             font-weight: 600;
-            background-color: #fff;
-            border-bottom-color: #fff;
+            background-color: #198754;
+            color: white;
+            border: none;
+        }
+
+        .nav-tabs .nav-link:hover {
+            border: none;
+            color: #198754;
         }
 
         .btn-primary {
-            background-color: #275850;
-            border-color: #275850;
+            background-color: #198754;
+            border-color: #198754;
+            font-weight: 500;
         }
 
         .btn-primary:hover {
-            background-color: #1f9158;
-            border-color: #1f9158;
+            background-color: #146c43;
+            border-color: #146c43;
+        }
+
+        .tab-content {
+            background: white;
+            border-radius: 0 8px 8px 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .tab-pane {
+            padding: 20px;
+        }
+
+        h2, h4 {
+            font-weight: 600;
         }
 
         @media (max-width: 768px) {
             .container {
                 padding: 20px;
             }
+            
+            .table-responsive {
+                max-height: 400px;
+            }
+        }
+
+        /* Custom scrollbar */
+        .table-responsive::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .table-responsive::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .table-responsive::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        .table-responsive::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
         }
     </style>
 </head>
@@ -350,22 +477,22 @@ $services = $conn->query("SELECT * FROM services ORDER BY ServiceID ASC");
         <!-- Tabs for different data types -->
         <ul class="nav nav-tabs" id="dataTabs" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="rooms-tab" data-bs-toggle="tab" data-bs-target="#rooms" type="button" role="tab">
+                <button class="nav-link <?= $activeTab === 'rooms' ? 'active' : '' ?>" id="rooms-tab" data-bs-toggle="tab" data-bs-target="#rooms" type="button" role="tab" onclick="setActiveTab('rooms')">
                     <i class="fas fa-door-open me-1"></i>Rooms
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="equipment-tab" data-bs-toggle="tab" data-bs-target="#equipment" type="button" role="tab">
+                <button class="nav-link <?= $activeTab === 'equipment' ? 'active' : '' ?>" id="equipment-tab" data-bs-toggle="tab" data-bs-target="#equipment" type="button" role="tab" onclick="setActiveTab('equipment')">
                     <i class="fas fa-desktop me-1"></i>Equipment/Facilities
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="personnel-tab" data-bs-toggle="tab" data-bs-target="#personnel" type="button" role="tab">
+                <button class="nav-link <?= $activeTab === 'personnel' ? 'active' : '' ?>" id="personnel-tab" data-bs-toggle="tab" data-bs-target="#personnel" type="button" role="tab" onclick="setActiveTab('personnel')">
                     <i class="fas fa-users me-1"></i>Personnel
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="services-tab" data-bs-toggle="tab" data-bs-target="#services" type="button" role="tab">
+                <button class="nav-link <?= $activeTab === 'services' ? 'active' : '' ?>" id="services-tab" data-bs-toggle="tab" data-bs-target="#services" type="button" role="tab" onclick="setActiveTab('services')">
                     <i class="fas fa-concierge-bell me-1"></i>Services
                 </button>
             </li>
@@ -373,7 +500,7 @@ $services = $conn->query("SELECT * FROM services ORDER BY ServiceID ASC");
         
         <div class="tab-content p-3 border border-top-0 rounded-bottom" id="dataTabsContent">
             <!-- Rooms Tab -->
-            <div class="tab-pane fade show active" id="rooms" role="tabpanel">
+            <div class="tab-pane fade <?= $activeTab === 'rooms' ? 'show active' : '' ?>" id="rooms" role="tabpanel">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h4>Room Management</h4>
                     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRoomModal">
@@ -383,13 +510,11 @@ $services = $conn->query("SELECT * FROM services ORDER BY ServiceID ASC");
                 
                 <div class="table-responsive">
                     <table class="table table-striped table-hover">
-                        <thead class="table-dark">
+                        <thead>
                             <tr>
                                 <th>ID</th>
                                 <th>Room Name</th>
                                 <th>Building Name</th>
-                                <th>Date Added</th>
-                                <th>Last Updated</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -399,8 +524,6 @@ $services = $conn->query("SELECT * FROM services ORDER BY ServiceID ASC");
                                 <td><?php echo $row['RoomID']; ?></td>
                                 <td><?php echo htmlspecialchars($row['roomname']); ?></td>
                                 <td><?php echo htmlspecialchars($row['building_name']); ?></td>
-                                <td><?php echo $row['date_added']; ?></td>
-                                <td><?php echo $row['last_updated']; ?></td>
                                 <td>
                                     <button class="btn btn-sm btn-warning edit-room" 
                                             data-id="<?php echo $row['RoomID']; ?>"
@@ -408,7 +531,10 @@ $services = $conn->query("SELECT * FROM services ORDER BY ServiceID ASC");
                                             data-building="<?php echo htmlspecialchars($row['building_name']); ?>">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-danger delete-room" data-id="<?php echo $row['RoomID']; ?>">
+                                    <button class="btn btn-sm btn-danger delete-room" 
+                                            data-id="<?php echo $row['RoomID']; ?>"
+                                            data-type="room"
+                                            data-name="<?php echo htmlspecialchars($row['roomname']); ?>">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </td>
@@ -420,7 +546,7 @@ $services = $conn->query("SELECT * FROM services ORDER BY ServiceID ASC");
             </div>
             
             <!-- Equipment/Facilities Tab -->
-            <div class="tab-pane fade" id="equipment" role="tabpanel">
+            <div class="tab-pane fade <?= $activeTab === 'equipment' ? 'show active' : '' ?>" id="equipment" role="tabpanel">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h4>Equipment/Facility Management</h4>
                     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEquipmentModal">
@@ -430,12 +556,10 @@ $services = $conn->query("SELECT * FROM services ORDER BY ServiceID ASC");
                 
                 <div class="table-responsive">
                     <table class="table table-striped table-hover">
-                        <thead class="table-dark">
+                        <thead>
                             <tr>
                                 <th>ID</th>
                                 <th>Name</th>
-                                <th>Date Added</th>
-                                <th>Last Updated</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -444,15 +568,16 @@ $services = $conn->query("SELECT * FROM services ORDER BY ServiceID ASC");
                             <tr>
                                 <td><?php echo $row['EFID']; ?></td>
                                 <td><?php echo htmlspecialchars($row['EFname']); ?></td>
-                                <td><?php echo $row['date_added']; ?></td>
-                                <td><?php echo $row['last_updated']; ?></td>
                                 <td>
                                     <button class="btn btn-sm btn-warning edit-equipment" 
                                             data-id="<?php echo $row['EFID']; ?>"
                                             data-name="<?php echo htmlspecialchars($row['EFname']); ?>">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-danger delete-equipment" data-id="<?php echo $row['EFID']; ?>">
+                                    <button class="btn btn-sm btn-danger delete-equipment" 
+                                            data-id="<?php echo $row['EFID']; ?>"
+                                            data-type="equipment"
+                                            data-name="<?php echo htmlspecialchars($row['EFname']); ?>">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </td>
@@ -464,7 +589,7 @@ $services = $conn->query("SELECT * FROM services ORDER BY ServiceID ASC");
             </div>
             
             <!-- Personnel Tab -->
-            <div class="tab-pane fade" id="personnel" role="tabpanel">
+            <div class="tab-pane fade <?= $activeTab === 'personnel' ? 'show active' : '' ?>" id="personnel" role="tabpanel">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h4>Personnel Management</h4>
                     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPersonnelModal">
@@ -474,11 +599,10 @@ $services = $conn->query("SELECT * FROM services ORDER BY ServiceID ASC");
                 
                 <div class="table-responsive">
                     <table class="table table-striped table-hover">
-                        <thead class="table-dark">
+                        <thead>
                             <tr>
                                 <th>ID</th>
                                 <th>Name</th>
-                                <th>Date Added</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -487,14 +611,16 @@ $services = $conn->query("SELECT * FROM services ORDER BY ServiceID ASC");
                             <tr>
                                 <td><?php echo $row['PersonnelId']; ?></td>
                                 <td><?php echo htmlspecialchars($row['name']); ?></td>
-                                <td><?php echo $row['date_added']; ?></td>
                                 <td>
                                     <button class="btn btn-sm btn-warning edit-personnel" 
                                             data-id="<?php echo $row['PersonnelId']; ?>"
                                             data-name="<?php echo htmlspecialchars($row['name']); ?>">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-danger delete-personnel" data-id="<?php echo $row['PersonnelId']; ?>">
+                                    <button class="btn btn-sm btn-danger delete-personnel" 
+                                            data-id="<?php echo $row['PersonnelId']; ?>"
+                                            data-type="personnel"
+                                            data-name="<?php echo htmlspecialchars($row['name']); ?>">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </td>
@@ -506,7 +632,7 @@ $services = $conn->query("SELECT * FROM services ORDER BY ServiceID ASC");
             </div>
             
             <!-- Services Tab -->
-            <div class="tab-pane fade" id="services" role="tabpanel">
+            <div class="tab-pane fade <?= $activeTab === 'services' ? 'show active' : '' ?>" id="services" role="tabpanel">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h4>Service Management</h4>
                     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addServiceModal">
@@ -516,12 +642,10 @@ $services = $conn->query("SELECT * FROM services ORDER BY ServiceID ASC");
                 
                 <div class="table-responsive">
                     <table class="table table-striped table-hover">
-                        <thead class="table-dark">
+                        <thead>
                             <tr>
                                 <th>ID</th>
                                 <th>Service Type</th>
-                                <th>Date Added</th>
-                                <th>Last Updated</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -530,15 +654,16 @@ $services = $conn->query("SELECT * FROM services ORDER BY ServiceID ASC");
                             <tr>
                                 <td><?php echo $row['ServiceID']; ?></td>
                                 <td><?php echo htmlspecialchars($row['Service_type']); ?></td>
-                                <td><?php echo $row['date_added']; ?></td>
-                                <td><?php echo $row['last_updated']; ?></td>
                                 <td>
                                     <button class="btn btn-sm btn-warning edit-service" 
                                             data-id="<?php echo $row['ServiceID']; ?>"
                                             data-name="<?php echo htmlspecialchars($row['Service_type']); ?>">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-danger delete-service" data-id="<?php echo $row['ServiceID']; ?>">
+                                    <button class="btn btn-sm btn-danger delete-service" 
+                                            data-id="<?php echo $row['ServiceID']; ?>"
+                                            data-type="service"
+                                            data-name="<?php echo htmlspecialchars($row['Service_type']); ?>">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </td>
@@ -555,13 +680,14 @@ $services = $conn->query("SELECT * FROM services ORDER BY ServiceID ASC");
     <div class="modal fade" id="addRoomModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form method="POST">
+                <form method="POST" id="addRoomForm">
                     <div class="modal-header">
                         <h5 class="modal-title">Add New Room</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
                         <input type="hidden" name="action" value="add_room">
+                        <input type="hidden" name="active_tab" value="<?= $activeTab ?>">
                         <div class="mb-3">
                             <label for="roomname" class="form-label">Room Name</label>
                             <input type="text" class="form-control" id="roomname" name="roomname" required>
@@ -572,7 +698,6 @@ $services = $conn->query("SELECT * FROM services ORDER BY ServiceID ASC");
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-primary">Add Room</button>
                     </div>
                 </form>
@@ -584,14 +709,15 @@ $services = $conn->query("SELECT * FROM services ORDER BY ServiceID ASC");
     <div class="modal fade" id="editRoomModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form method="POST">
+                <form method="POST" id="editRoomForm">
                     <div class="modal-header">
                         <h5 class="modal-title">Edit Room</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
                         <input type="hidden" name="action" value="edit_room">
-                        <input type="hidden" name="RoomID" id="edit_room_RoomID"> <!-- Changed from 'id' to 'RoomID' -->
+                        <input type="hidden" name="RoomID" id="edit_room_RoomID">
+                        <input type="hidden" name="active_tab" value="<?= $activeTab ?>">
                         <div class="mb-3">
                             <label for="edit_roomname" class="form-label">Room Name</label>
                             <input type="text" class="form-control" id="edit_roomname" name="roomname" required>
@@ -602,7 +728,6 @@ $services = $conn->query("SELECT * FROM services ORDER BY ServiceID ASC");
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-primary">Update Room</button>
                     </div>
                 </form>
@@ -614,20 +739,20 @@ $services = $conn->query("SELECT * FROM services ORDER BY ServiceID ASC");
     <div class="modal fade" id="addEquipmentModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form method="POST">
+                <form method="POST" id="addEquipmentForm">
                     <div class="modal-header">
                         <h5 class="modal-title">Add New Equipment/Facility</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
                         <input type="hidden" name="action" value="add_equipment">
+                        <input type="hidden" name="active_tab" value="<?= $activeTab ?>">
                         <div class="mb-3">
                             <label for="EFname" class="form-label">Equipment/Facility Name</label>
                             <input type="text" class="form-control" id="EFname" name="EFname" required>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-primary">Add Equipment/Facility</button>
                     </div>
                 </form>
@@ -639,7 +764,7 @@ $services = $conn->query("SELECT * FROM services ORDER BY ServiceID ASC");
     <div class="modal fade" id="editEquipmentModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form method="POST">
+                <form method="POST" id="editEquipmentForm">
                     <div class="modal-header">
                         <h5 class="modal-title">Edit Equipment/Facility</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -647,13 +772,13 @@ $services = $conn->query("SELECT * FROM services ORDER BY ServiceID ASC");
                     <div class="modal-body">
                         <input type="hidden" name="action" value="edit_equipment">
                         <input type="hidden" name="EFID" id="edit_equipment_id">
+                        <input type="hidden" name="active_tab" value="<?= $activeTab ?>">
                         <div class="mb-3">
                             <label for="edit_EFname" class="form-label">Equipment/Facility Name</label>
                             <input type="text" class="form-control" id="edit_EFname" name="EFname" required>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-primary">Update Equipment/Facility</button>
                     </div>
                 </form>
@@ -665,20 +790,20 @@ $services = $conn->query("SELECT * FROM services ORDER BY ServiceID ASC");
     <div class="modal fade" id="addPersonnelModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form method="POST">
+                <form method="POST" id="addPersonnelForm">
                     <div class="modal-header">
                         <h5 class="modal-title">Add New Personnel</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
                         <input type="hidden" name="action" value="add_personnel">
+                        <input type="hidden" name="active_tab" value="<?= $activeTab ?>">
                         <div class="mb-3">
                             <label for="name" class="form-label">Personnel Name</label>
                             <input type="text" class="form-control" id="name" name="name" required>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-primary">Add Personnel</button>
                     </div>
                 </form>
@@ -690,7 +815,7 @@ $services = $conn->query("SELECT * FROM services ORDER BY ServiceID ASC");
     <div class="modal fade" id="editPersonnelModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form method="POST">
+                <form method="POST" id="editPersonnelForm">
                     <div class="modal-header">
                         <h5 class="modal-title">Edit Personnel</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -698,13 +823,13 @@ $services = $conn->query("SELECT * FROM services ORDER BY ServiceID ASC");
                     <div class="modal-body">
                         <input type="hidden" name="action" value="edit_personnel">
                         <input type="hidden" name="PersonnelId" id="edit_personnel_id">
+                        <input type="hidden" name="active_tab" value="<?= $activeTab ?>">
                         <div class="mb-3">
                             <label for="edit_personnel_name" class="form-label">Personnel Name</label>
                             <input type="text" class="form-control" id="edit_personnel_name" name="name" required>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-primary">Update Personnel</button>
                     </div>
                 </form>
@@ -716,20 +841,20 @@ $services = $conn->query("SELECT * FROM services ORDER BY ServiceID ASC");
     <div class="modal fade" id="addServiceModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form method="POST">
+                <form method="POST" id="addServiceForm">
                     <div class="modal-header">
                         <h5 class="modal-title">Add New Service</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
                         <input type="hidden" name="action" value="add_service">
+                        <input type="hidden" name="active_tab" value="<?= $activeTab ?>">
                         <div class="mb-3">
                             <label for="Service_type" class="form-label">Service Type</label>
                             <input type="text" class="form-control" id="Service_type" name="Service_type" required>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-primary">Add Service</button>
                     </div>
                 </form>
@@ -741,48 +866,22 @@ $services = $conn->query("SELECT * FROM services ORDER BY ServiceID ASC");
     <div class="modal fade" id="editServiceModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form method="POST">
+                <form method="POST" id="editServiceForm">
                     <div class="modal-header">
                         <h5 class="modal-title">Edit Service</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
                         <input type="hidden" name="action" value="edit_service">
-                        <input type="hidden" name="ServiceID" id="edit_service_id"> <!-- Changed from 'serviceID' to 'ServiceID' -->
+                        <input type="hidden" name="ServiceID" id="edit_service_id">
+                        <input type="hidden" name="active_tab" value="<?= $activeTab ?>">
                         <div class="mb-3">
                             <label for="edit_service_name" class="form-label">Service Type</label>
                             <input type="text" class="form-control" id="edit_service_name" name="Service_type" required>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-primary">Update Service</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Delete Confirmation Modal -->
-    <div class="modal fade" id="deleteModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <form method="POST" id="deleteForm">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Confirm Delete</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p>Are you sure you want to delete this item? This action cannot be undone.</p>
-                        <input type="hidden" name="action" id="delete_action">
-                        <input type="hidden" name="RoomID" id="delete_room_id"> <!-- Changed from 'id' to 'RoomID' -->
-                        <input type="hidden" name="EFID" id="delete_equipment_id">
-                        <input type="hidden" name="PersonnelId" id="delete_personnel_id">
-                        <input type="hidden" name="ServiceID" id="delete_service_id"> <!-- Changed from 'serviceID' to 'ServiceID' -->
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-danger">Delete</button>
                     </div>
                 </form>
             </div>
@@ -793,7 +892,36 @@ $services = $conn->query("SELECT * FROM services ORDER BY ServiceID ASC");
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
     
     <script>
+        // Function to set active tab
+        function setActiveTab(tabName) {
+            // Update the URL with the active tab parameter
+            window.history.replaceState(null, null, '?tab=' + tabName);
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
+            // Show SweetAlert2 notifications if any
+            <?php if (isset($_SESSION['alert'])): ?>
+                const alert = <?= json_encode($_SESSION['alert']) ?>;
+                if (alert.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: alert.message,
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: alert.message,
+                        timer: 4000,
+                        showConfirmButton: true
+                    });
+                }
+                <?php unset($_SESSION['alert']); ?>
+            <?php endif; ?>
+
             // Room edit functionality
             const editRoomButtons = document.querySelectorAll('.edit-room');
             editRoomButtons.forEach(button => {
@@ -808,25 +936,6 @@ $services = $conn->query("SELECT * FROM services ORDER BY ServiceID ASC");
                     
                     const editModal = new bootstrap.Modal(document.getElementById('editRoomModal'));
                     editModal.show();
-                });
-            });
-            
-            // Room delete functionality
-            const deleteRoomButtons = document.querySelectorAll('.delete-room');
-            deleteRoomButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const id = this.getAttribute('data-id');
-                    
-                    document.getElementById('delete_action').value = 'delete_room';
-                    document.getElementById('delete_room_id').value = id; // Updated to use delete_room_id
-                    
-                    // Clear other ID fields
-                    document.getElementById('delete_equipment_id').value = '';
-                    document.getElementById('delete_personnel_id').value = '';
-                    document.getElementById('delete_service_id').value = '';
-                    
-                    const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-                    deleteModal.show();
                 });
             });
             
@@ -845,25 +954,6 @@ $services = $conn->query("SELECT * FROM services ORDER BY ServiceID ASC");
                 });
             });
             
-            // Equipment delete functionality
-            const deleteEquipmentButtons = document.querySelectorAll('.delete-equipment');
-            deleteEquipmentButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const id = this.getAttribute('data-id');
-                    
-                    document.getElementById('delete_action').value = 'delete_equipment';
-                    document.getElementById('delete_equipment_id').value = id;
-                    
-                    // Clear other ID fields
-                    document.getElementById('delete_room_id').value = '';
-                    document.getElementById('delete_personnel_id').value = '';
-                    document.getElementById('delete_service_id').value = '';
-                    
-                    const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-                    deleteModal.show();
-                });
-            });
-            
             // Personnel edit functionality
             const editPersonnelButtons = document.querySelectorAll('.edit-personnel');
             editPersonnelButtons.forEach(button => {
@@ -876,25 +966,6 @@ $services = $conn->query("SELECT * FROM services ORDER BY ServiceID ASC");
                     
                     const editModal = new bootstrap.Modal(document.getElementById('editPersonnelModal'));
                     editModal.show();
-                });
-            });
-            
-            // Personnel delete functionality
-            const deletePersonnelButtons = document.querySelectorAll('.delete-personnel');
-            deletePersonnelButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const id = this.getAttribute('data-id');
-                    
-                    document.getElementById('delete_action').value = 'delete_personnel';
-                    document.getElementById('delete_personnel_id').value = id;
-                    
-                    // Clear other ID fields
-                    document.getElementById('delete_room_id').value = '';
-                    document.getElementById('delete_equipment_id').value = '';
-                    document.getElementById('delete_service_id').value = '';
-                    
-                    const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-                    deleteModal.show();
                 });
             });
             
@@ -912,23 +983,135 @@ $services = $conn->query("SELECT * FROM services ORDER BY ServiceID ASC");
                     editModal.show();
                 });
             });
-            
-            // Service delete functionality
-            const deleteServiceButtons = document.querySelectorAll('.delete-service');
-            deleteServiceButtons.forEach(button => {
+
+            // Delete functionality with SweetAlert2
+            const deleteButtons = document.querySelectorAll('.delete-room, .delete-equipment, .delete-personnel, .delete-service');
+            deleteButtons.forEach(button => {
                 button.addEventListener('click', function() {
                     const id = this.getAttribute('data-id');
+                    const type = this.getAttribute('data-type');
+                    const name = this.getAttribute('data-name');
                     
-                    document.getElementById('delete_action').value = 'delete_service';
-                    document.getElementById('delete_service_id').value = id;
+                    let action = '';
+                    let title = '';
                     
-                    // Clear other ID fields
-                    document.getElementById('delete_room_id').value = '';
-                    document.getElementById('delete_equipment_id').value = '';
-                    document.getElementById('delete_personnel_id').value = '';
+                    switch(type) {
+                        case 'room':
+                            action = 'delete_room';
+                            title = 'Delete Room';
+                            break;
+                        case 'equipment':
+                            action = 'delete_equipment';
+                            title = 'Delete Equipment/Facility';
+                            break;
+                        case 'personnel':
+                            action = 'delete_personnel';
+                            title = 'Delete Personnel';
+                            break;
+                        case 'service':
+                            action = 'delete_service';
+                            title = 'Delete Service';
+                            break;
+                    }
                     
-                    const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-                    deleteModal.show();
+                    Swal.fire({
+                        title: title,
+                        html: `Are you sure you want to delete <strong>"${name}"</strong>?<br>This action cannot be undone.`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Yes, delete it!',
+                        cancelButtonText: 'Cancel',
+                        reverseButtons: true
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Create a form and submit it
+                            const form = document.createElement('form');
+                            form.method = 'POST';
+                            form.action = 'system_data.php';
+                            
+                            const actionInput = document.createElement('input');
+                            actionInput.type = 'hidden';
+                            actionInput.name = 'action';
+                            actionInput.value = action;
+                            
+                            const activeTabInput = document.createElement('input');
+                            activeTabInput.type = 'hidden';
+                            activeTabInput.name = 'active_tab';
+                            activeTabInput.value = '<?= $activeTab ?>';
+                            
+                            form.appendChild(actionInput);
+                            form.appendChild(activeTabInput);
+                            
+                            // Add the appropriate ID field based on type
+                            let idFieldName = '';
+                            switch(type) {
+                                case 'room':
+                                    idFieldName = 'RoomID';
+                                    break;
+                                case 'equipment':
+                                    idFieldName = 'EFID';
+                                    break;
+                                case 'personnel':
+                                    idFieldName = 'PersonnelId';
+                                    break;
+                                case 'service':
+                                    idFieldName = 'ServiceID';
+                                    break;
+                            }
+                            
+                            const idInput = document.createElement('input');
+                            idInput.type = 'hidden';
+                            idInput.name = idFieldName;
+                            idInput.value = id;
+                            form.appendChild(idInput);
+                            
+                            document.body.appendChild(form);
+                            form.submit();
+                        }
+                    });
+                });
+            });
+
+            // Add SweetAlert2 confirmation for form submissions
+            const forms = document.querySelectorAll('form[id$="Form"]');
+            forms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const formData = new FormData(this);
+                    const action = formData.get('action');
+                    
+                    let title = '';
+                    let text = '';
+                    let confirmButtonText = '';
+                    
+                    if (action.includes('add')) {
+                        title = 'Confirm Add';
+                        text = 'Are you sure you want to add this item?';
+                        confirmButtonText = 'Yes, add it!';
+                    } else if (action.includes('edit')) {
+                        title = 'Confirm Update';
+                        text = 'Are you sure you want to update this item?';
+                        confirmButtonText = 'Yes, update it!';
+                    }
+                    
+                    Swal.fire({
+                        title: title,
+                        text: text,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#198754',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: confirmButtonText,
+                        cancelButtonText: 'Cancel',
+                        reverseButtons: true
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            this.submit();
+                        }
+                    });
                 });
             });
         });

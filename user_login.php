@@ -92,7 +92,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             overflow: hidden;
         }
 
-        /* Enhanced background with geometric patterns */
         body::before {
             content: "";
             position: absolute;
@@ -109,7 +108,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             z-index: -1;
         }
 
-        /* Logo styling - Made smaller */
         .logo img {
             max-width: 120px;
             height: auto;
@@ -117,7 +115,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             margin: 0 auto 15px auto;
         }
 
-        /* Floating shapes animation */
         .floating-shapes {
             position: absolute;
             top: 0;
@@ -409,7 +406,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     </style>
 </head>
 <body>
-    <!-- Enhanced background with floating shapes -->
+    
     <div class="floating-shapes">
         <div class="shape"></div>
         <div class="shape"></div>

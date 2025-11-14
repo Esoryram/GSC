@@ -89,7 +89,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             overflow: hidden;
         }
 
-        /* Enhanced background with geometric patterns */
         body::before {
             content: "";
             position: absolute;
@@ -106,7 +105,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             z-index: -1;
         }
 
-        /* Logo styling */
         .logo img {
             max-width: 120px;
             height: auto;

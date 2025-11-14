@@ -153,7 +153,7 @@ $announcementsResult = mysqli_query($conn, $announcementsQuery);
             position: absolute;
             top: 100%;
             right: 0;
-            background: white;
+            background: linear-gradient(135deg, #087830, #3c4142);
             min-width: 180px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
             border-radius: 5px;
@@ -169,7 +169,7 @@ $announcementsResult = mysqli_query($conn, $announcementsQuery);
             display: block;
             padding: 12px 16px;
             text-decoration: none;
-            color: #333;
+            color: white;
             font-size: 14px;
         }
 
@@ -364,6 +364,11 @@ $announcementsResult = mysqli_query($conn, $announcementsQuery);
             background-color: #f3f4f6;
             color: #374151;
             font-weight: 600;
+        }
+
+        /* Make all table data cells normal font weight */
+        .table tbody td {
+            font-weight: normal !important;
         }
 
         .table tbody tr:hover {
