@@ -14,7 +14,7 @@
             <label for="currentPassword" class="form-label">Current Password</label>
             <div class="input-group">
               <input type="password" class="form-control" id="currentPassword" required>
-              <button type="button" class="btn btn-outline-secondary toggle-password" data-target="currentPassword">
+              <button type="button" class="btn btn-outline-secondary toggle-password" data-target="currentPassword" style="display: none;">
                 <i class="fas fa-eye"></i>
               </button>
             </div>
@@ -23,7 +23,7 @@
             <label for="newPassword" class="form-label">New Password</label>
             <div class="input-group">
               <input type="password" class="form-control" id="newPassword" required>
-              <button type="button" class="btn btn-outline-secondary toggle-password" data-target="newPassword">
+              <button type="button" class="btn btn-outline-secondary toggle-password" data-target="newPassword" style="display: none;">
                 <i class="fas fa-eye"></i>
               </button>
             </div>
@@ -32,7 +32,7 @@
             <label for="confirmPassword" class="form-label">Confirm New Password</label>
             <div class="input-group">
               <input type="password" class="form-control" id="confirmPassword" required>
-              <button type="button" class="btn btn-outline-secondary toggle-password" data-target="confirmPassword">
+              <button type="button" class="btn btn-outline-secondary toggle-password" data-target="confirmPassword" style="display: none;">
                 <i class="fas fa-eye"></i>
               </button>
             </div>
@@ -51,27 +51,74 @@
 <script>
 // Password visibility toggle functionality
 document.addEventListener('DOMContentLoaded', function() {
-    // Toggle password visibility
-    document.querySelectorAll('.toggle-password').forEach(button => {
-        button.addEventListener('click', function() {
-            const targetId = this.getAttribute('data-target');
-            const passwordInput = document.getElementById(targetId);
-            const icon = this.querySelector('i');
-            
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-                this.title = 'Hide password';
-            } else {
-                passwordInput.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-                this.title = 'Show password';
+    // Function to toggle password visibility
+    function togglePasswordVisibility(button) {
+        const targetId = button.getAttribute('data-target');
+        const passwordInput = document.getElementById(targetId);
+        const icon = button.querySelector('i');
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+            button.title = 'Hide password';
+        } else {
+            passwordInput.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+            button.title = 'Show password';
+        }
+        
+        // Focus back on the input for better UX
+        passwordInput.focus();
+    }
+
+    // Function to handle input events and show/hide eye icon
+    function handlePasswordInput(input) {
+        const targetId = input.id;
+        const toggleButton = document.querySelector(`.toggle-password[data-target="${targetId}"]`);
+        
+        if (input.value.length > 0) {
+            toggleButton.style.display = 'block';
+        } else {
+            toggleButton.style.display = 'none';
+            // Reset to password type and eye icon when empty
+            input.type = 'password';
+            const icon = toggleButton.querySelector('i');
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+
+    // Initialize event listeners for all password inputs
+    const passwordInputs = ['currentPassword', 'newPassword', 'confirmPassword'];
+    
+    passwordInputs.forEach(inputId => {
+        const input = document.getElementById(inputId);
+        const toggleButton = document.querySelector(`.toggle-password[data-target="${inputId}"]`);
+        
+        // Show/hide eye icon based on input content
+        input.addEventListener('input', function() {
+            handlePasswordInput(this);
+        });
+        
+        // Toggle password visibility when eye icon is clicked
+        toggleButton.addEventListener('click', function() {
+            togglePasswordVisibility(this);
+        });
+        
+        // Also handle on focus to ensure icon appears if there's text
+        input.addEventListener('focus', function() {
+            if (this.value.length > 0) {
+                toggleButton.style.display = 'block';
             }
-            
-            // Focus back on the input for better UX
-            passwordInput.focus();
+        });
+        
+        // Hide icon when input loses focus and is empty
+        input.addEventListener('blur', function() {
+            if (this.value.length === 0) {
+                toggleButton.style.display = 'none';
+            }
         });
     });
 
@@ -121,6 +168,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     showConfirmButton: false
                 }).then(() => {
                     document.getElementById('changePasswordForm').reset();
+                    // Hide all eye icons after successful password change
+                    document.querySelectorAll('.toggle-password').forEach(btn => {
+                        btn.style.display = 'none';
+                    });
                     bootstrap.Modal.getInstance(document.getElementById('changePasswordModal')).hide();
                 });
             } else {
@@ -138,19 +189,29 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Reset password fields to hidden when modal is closed
+    // Reset password fields when modal is closed
     document.getElementById('changePasswordModal').addEventListener('hidden.bs.modal', function() {
         // Reset all password fields to hidden
         document.querySelectorAll('input[type="text"][id*="Password"]').forEach(input => {
             input.type = 'password';
         });
-        // Reset all eye icons
-        document.querySelectorAll('.toggle-password i').forEach(icon => {
+        // Reset all eye icons to default state and hide them
+        document.querySelectorAll('.toggle-password').forEach(button => {
+            button.style.display = 'none';
+            const icon = button.querySelector('i');
             icon.classList.remove('fa-eye-slash');
             icon.classList.add('fa-eye');
         });
         // Reset the form
         document.getElementById('changePasswordForm').reset();
+    });
+
+    // Also handle when modal is shown to ensure clean state
+    document.getElementById('changePasswordModal').addEventListener('show.bs.modal', function() {
+        // Ensure all eye icons are hidden initially
+        document.querySelectorAll('.toggle-password').forEach(button => {
+            button.style.display = 'none';
+        });
     });
 });
 </script>
