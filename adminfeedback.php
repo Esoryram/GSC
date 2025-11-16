@@ -202,18 +202,18 @@ $result = $conn->query($query);
         }
 
         .dropdown .username-btn {
-            color: white !important;
-            background: none !important;
-            border: none !important;
+            color: white;
+            background: none;
+            border: none;
             font-weight: bold;
             font-size: 16px;
         }
 
         .dropdown .username-btn:hover,
         .dropdown .username-btn:focus {
-            color: white !important;
-            background: none !important;
-            border: none !important;
+            color: white;
+            background: none;
+            border: none;
         }
 
         .table thead {
@@ -289,7 +289,7 @@ $result = $conn->query($query);
 
         /* UPDATED: Modal header gradient */
         .modal-header-gradient {
-            background: linear-gradient(135deg, #087830, #3c4142) !important;
+            background: linear-gradient(135deg, #087830, #3c4142);
             color: white;
         }
 

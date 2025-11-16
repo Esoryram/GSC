@@ -32,7 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if ($insert->execute()) {
             $_SESSION['alert_type'] = 'success';
-            $_SESSION['alert_message'] = 'Announcement posted successfully!';
+            $_SESSION['alert_message'] = 'Announcement updated successfully!';
         } else {
             $_SESSION['alert_type'] = 'error';
             $_SESSION['alert_message'] = 'Error posting announcement.';

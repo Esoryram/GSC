@@ -157,7 +157,7 @@ while ($eq = $equipment_result->fetch_assoc()) {
             position: absolute;
             top: 100%;
             right: 0;
-            background: linear-gradient(135deg, #087830, #3c4142);
+            background: white;
             min-width: 180px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
             border-radius: 5px;
@@ -178,18 +178,18 @@ while ($eq = $equipment_result->fetch_assoc()) {
         }
 
         .dropdown .username-btn {
-            color: white !important;
-            background: none !important;
-            border: none !important;
+            color: white;
+            background: none;
+            border: none;
             font-weight: bold;
             font-size: 16px;
         }
 
         .dropdown .username-btn:hover,
         .dropdown .username-btn:focus {
-            color: white !important;
-            background: none !important;
-            border: none !important;
+            color: white;
+            background: none;
+            border: none;
         }
 
         .table thead {
@@ -454,7 +454,7 @@ while ($eq = $equipment_result->fetch_assoc()) {
 
         /* UPDATED: Modal header gradient */
         .modal-header-gradient {
-            background: linear-gradient(135deg, #087830, #3c4142) !important;
+            background: linear-gradient(135deg, #087830, #3c4142);
             color: white;
         }
     </style>

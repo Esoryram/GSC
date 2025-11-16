@@ -305,9 +305,9 @@ $services = $conn->query("SELECT * FROM services ORDER BY ServiceID DESC");
         }
 
         .dropdown .username-btn {
-            color: white !important;
-            background: none !important;
-            border: none !important;
+            color: white;
+            background: none;
+            border: none;
             font-weight: 600;
             font-size: 16px;
         }

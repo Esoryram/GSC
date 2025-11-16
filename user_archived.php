@@ -273,8 +273,8 @@ body {
 
 /* Feedback Submitted State */
 .feedback-submitted {
-    background: #6c757d !important;
-    cursor: not-allowed !important;
+    background: #6c757d;
+    cursor: not-allowed;
 }
 
 .feedback-submitted-text {

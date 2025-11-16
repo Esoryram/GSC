@@ -174,18 +174,18 @@ $announcementsResult = mysqli_query($conn, $announcementsQuery);
         }
 
         .dropdown .username-btn {
-            color: white !important;
-            background: none !important;
-            border: none !important;
+            color: white;
+            background: none;
+            border: none;
             font-weight: bold;
             font-size: 16px;
         }
 
         .dropdown .username-btn:hover,
         .dropdown .username-btn:focus {
-            color: white !important;
-            background: none !important;
-            border: none !important;
+            color: white;
+            background: none;
+            border: none;
         }
 
         .container {
@@ -368,7 +368,7 @@ $announcementsResult = mysqli_query($conn, $announcementsQuery);
 
         /* Make all table data cells normal font weight */
         .table tbody td {
-            font-weight: normal !important;
+            font-weight: normal;
         }
 
         .table tbody tr:hover {

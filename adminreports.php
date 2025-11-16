@@ -216,18 +216,18 @@ if ($generateClicked) {
     }
 
     .dropdown .username-btn {
-        color: white !important;
-        background: none !important;
-        border: none !important;
+        color: white;
+        background: none;
+        border: none;
         font-weight: bold;
         font-size: 16px;
     }
 
     .dropdown .username-btn:hover,
     .dropdown .username-btn:focus {
-        color: white !important;
-        background: none !important;
-        border: none !important;
+        color: white;
+        background: none;
+        border: none;
     }
 
     .page-container {
@@ -284,7 +284,7 @@ if ($generateClicked) {
     }
 
     .custom-select option:hover {
-        background-color: #198754 !important;
+        background-color: #198754;
         color: white;
     }
 
@@ -334,8 +334,8 @@ if ($generateClicked) {
         body {
             font-family: 'Poppins', sans-serif;
             font-size: 12pt;
-            background: white !important;
-            color: black !important;
+            background: white;
+            color: black;
             margin: 0;
             padding: 0;
         }
@@ -345,7 +345,7 @@ if ($generateClicked) {
         .report-controls,
         .navbar,
         .page-title {
-            display: none !important;
+            display: none;
         }
         
         .page-container {
@@ -355,7 +355,7 @@ if ($generateClicked) {
         }
         
         .print-header {
-            display: block !important;
+            display: block;
             text-align: center;
             margin-bottom: 20px;
             padding-bottom: 10px;
@@ -400,8 +400,8 @@ if ($generateClicked) {
         }
         
         .table thead {
-            background-color: #198754 !important;
-            color: white !important;
+            background-color: #198754;
+            color: white;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
@@ -424,28 +424,28 @@ if ($generateClicked) {
         }
         
         .bg-success {
-            background-color: #198754 !important;
-            color: white !important;
+            background-color: #198754;
+            color: white;
         }
         
         .bg-primary {
-            background-color: #0d6efd !important;
-            color: white !important;
+            background-color: #0d6efd;
+            color: white;
         }
         
         .bg-warning {
-            background-color: #ffc107 !important;
-            color: black !important;
+            background-color: #ffc107;
+            color: black;
         }
         
         .bg-danger {
-            background-color: #dc3545 !important;
-            color: white !important;
+            background-color: #dc3545;
+            color: white;
         }
         
         .bg-secondary {
-            background-color: #6c757d !important;
-            color: white !important;
+            background-color: #6c757d;
+            color: white;
         }
         
         @page {

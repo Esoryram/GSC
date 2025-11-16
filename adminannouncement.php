@@ -519,7 +519,7 @@
         }
         
         .no-announcements i {
-            font-size: 2.5rem !important;
+            font-size: 2.5rem;
         }
     }
 
