@@ -550,9 +550,12 @@ $equipment = $conn->query("SELECT * FROM equipmentfacility ORDER BY EFname");
 document.addEventListener('DOMContentLoaded', function() {
     // Get the referrer (previous page)
     const referrer = document.referrer;
+    const currentPage = window.location.href;
     
-    // Store it in sessionStorage for persistence
-    if (referrer && !referrer.includes('usersubmit.php')) {
+    // Only store the referrer if it's different from current page and from our domain
+    if (referrer && 
+        !referrer.includes(currentPage) && 
+        (referrer.includes('userdb.php') || referrer.includes('userconcerns.php'))) {
         sessionStorage.setItem('previousPage', referrer);
     }
     
@@ -932,10 +935,16 @@ form.addEventListener('submit', function(e) {
                 text: data.message,
                 confirmButtonText: 'OK'
             }).then(() => {
-                // Reset the form and stay on the same page
-                form.reset();
-                resetCustomDropdowns();
-                window.scrollTo(0, 0);
+                // Get the redirect URL from sessionStorage or use default
+                const previousPage = sessionStorage.getItem('previousPage');
+                let redirectUrl = 'userconcerns.php'; // Default fallback
+                
+                if (previousPage) {
+                    redirectUrl = previousPage;
+                }
+                
+                // Redirect to the appropriate page
+                window.location.href = redirectUrl;
             });
         } else {
             Swal.fire({

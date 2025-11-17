@@ -23,7 +23,7 @@
     }
 
     // Fetch all announcements
-    $announcementsQuery = "SELECT * FROM Announcements ORDER BY created_at DESC";
+    $announcementsQuery = "SELECT * FROM announcements ORDER BY created_at DESC";
     $announcementsResult = mysqli_query($conn, $announcementsQuery);
     ?>
 

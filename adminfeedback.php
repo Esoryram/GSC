@@ -75,7 +75,7 @@ $query = "
     SELECT f.FeedbackID, f.Comments, f.Date_Submitted, f.Admin_Response, f.Date_Responded,
            c.Concern_Title, c.Description, c.Room, c.Service_type,
            a.Username, a.Name
-    FROM Feedbacks f
+    FROM feedbacks f
     JOIN concerns c ON f.ConcernID = c.ConcernID
     JOIN accounts a ON f.AccountID = a.AccountID
     ORDER BY f.Date_Submitted DESC

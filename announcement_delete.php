@@ -11,7 +11,7 @@ if (!isset($_SESSION['username'])) {
 if (isset($_GET['id'])) {
     $id = intval($_GET['id']); // sanitize input
 
-    $deleteQuery = "DELETE FROM Announcements WHERE AnnouncementID = $id";
+    $deleteQuery = "DELETE FROM announcements WHERE AnnouncementID = $id";
     if (mysqli_query($conn, $deleteQuery)) {
         $_SESSION['alert_type'] = 'success';
         $_SESSION['alert_message'] = 'Announcement deleted successfully!';
