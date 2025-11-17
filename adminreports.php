@@ -30,7 +30,7 @@ if ($roomsResult) {
 }
 
 // Fetch unique assigned personnel
-$assignedToQuery  = "SELECT DISTINCT Assigned_to FROM Concerns WHERE Assigned_to IS NOT NULL AND Assigned_to != '' ORDER BY Assigned_to ASC";
+$assignedToQuery  = "SELECT DISTINCT Assigned_to FROM concerns WHERE Assigned_to IS NOT NULL AND Assigned_to != '' ORDER BY Assigned_to ASC";
 $assignedToResult = mysqli_query($conn, $assignedToQuery);
 $assignedOptions  = [];
 
@@ -41,7 +41,7 @@ if ($assignedToResult) {
 }
 
 // Fetch unique service types
-$serviceQuery  = "SELECT DISTINCT Service_type FROM Concerns WHERE Service_type IS NOT NULL AND Service_type != '' ORDER BY Service_type ASC";
+$serviceQuery  = "SELECT DISTINCT Service_type FROM concerns WHERE Service_type IS NOT NULL AND Service_type != '' ORDER BY Service_type ASC";
 $serviceResult = mysqli_query($conn, $serviceQuery);
 $serviceOptions = [];
 
@@ -63,7 +63,7 @@ if ($generateClicked) {
             c.Concern_Date,
             c.Status,
             c.Assigned_to
-        FROM Concerns c
+        FROM concerns c
         WHERE 1=1
     ";
 

@@ -24,7 +24,7 @@ $username = $_SESSION['username'];
 
 try {
     // Verify current password using username (more reliable than accountID)
-    $stmt = $conn->prepare("SELECT AccountID, Password FROM Accounts WHERE Username = ?");
+    $stmt = $conn->prepare("SELECT AccountID, Password FROM accounts WHERE Username = ?");
     if (!$stmt) {
         throw new Exception('Database preparation failed.');
     }
@@ -50,7 +50,7 @@ try {
 
     // Hash new password and update
     $newHash = password_hash($newPassword, PASSWORD_DEFAULT);
-    $updateStmt = $conn->prepare("UPDATE Accounts SET Password = ? WHERE AccountID = ?");
+    $updateStmt = $conn->prepare("UPDATE accounts SET Password = ? WHERE AccountID = ?");
     
     if (!$updateStmt) {
         throw new Exception('Database update preparation failed.');

@@ -671,19 +671,19 @@ body {
                     </h2>
                     <div id="concern<?= $index ?>" class="accordion-collapse collapse" data-bs-parent="#concernsAccordion">
                         <div class="accordion-body">
-                            <!-- Concern Title -->
+                            
                             <div class="form-field">
                                 <label>Concern Title</label>
                                 <div class="form-control"><?= htmlspecialchars($row['Concern_Title']) ?></div>
                             </div>
                             
-                            <!-- Description -->
+                            
                             <div class="form-field">
                                 <label>Description</label>
                                 <div class="form-control"><?= htmlspecialchars($row['Description']) ?></div>
                             </div>
 
-                            <!-- Room and Building in same row -->
+                           
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-field">
@@ -701,7 +701,7 @@ body {
                                 </div>
                             </div>
 
-                            <!-- Service Type and Equipment/Facility in same row -->
+                           
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-field">
@@ -719,13 +719,13 @@ body {
                                 </div>
                             </div>
 
-                            <!-- Assigned To -->
+                            
                             <div class="form-field">
                                 <label>Assigned To</label>
                                 <div class="form-control"><?= !empty($row['Assigned_to']) ? htmlspecialchars($row['Assigned_to']) : 'Not assigned yet' ?></div>
                             </div>
                             
-                            <!-- Attachment - Simple green button -->
+                            
                             <div class="form-field">
                                 <label>Attachment</label>
                                 <div class="form-control">
@@ -756,12 +756,12 @@ body {
                                 </div>
                             </div>
 
-                            <!-- Feedback Section - Combined with Admin Response -->
+                            
                             <div class="form-field">
                                 <label>Feedback Status</label>
                                 <div class="form-control">
                                     <?php if ($hasFeedback): ?>
-                                        <!-- User Feedback Section -->
+                                       
                                         <div class="feedback-submitted-text">
                                             <i class="fas fa-check-circle text-success"></i>
                                             <span>Feedback submitted on <?= $feedbackDate ?></span>
@@ -773,7 +773,7 @@ body {
                                             </div>
                                         <?php endif; ?>
 
-                                        <!-- Admin Response - Integrated in same section -->
+                                        
                                         <?php if ($hasAdminResponse): ?>
                                             <div class="admin-response-section">
                                                 <div class="admin-response-header">
@@ -953,18 +953,18 @@ document.getElementById('feedbackForm').addEventListener('submit', function(e) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // Close modal
+            
             const modal = bootstrap.Modal.getInstance(document.getElementById('feedbackModal'));
             modal.hide();
             
-            // Show success message
+          
             Swal.fire({
                 icon: 'success',
                 title: 'Success!',
                 text: 'Your feedback has been submitted successfully.',
                 confirmButtonColor: '#087830'
             }).then(() => {
-                // Reload the page to show updated feedback status
+              
                 window.location.reload();
             });
         } else {
@@ -975,7 +975,7 @@ document.getElementById('feedbackForm').addEventListener('submit', function(e) {
                 confirmButtonColor: '#dc3545'
             });
             
-            // Reset button state on error
+            
             submitBtn.innerHTML = originalText;
             submitBtn.disabled = false;
         }

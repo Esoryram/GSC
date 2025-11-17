@@ -11,19 +11,19 @@ $name = isset($_SESSION['name']) ? $_SESSION['name'] : $username;
 $activePage = "dashboard";
 
 // FIXED: Total concerns (excluding Completed and Cancelled)
-$totalQuery = "SELECT COUNT(*) AS total FROM Concerns WHERE Status NOT IN ('Completed', 'Cancelled')";
+$totalQuery = "SELECT COUNT(*) AS total FROM concerns WHERE Status NOT IN ('Completed', 'Cancelled')";
 $totalResult = mysqli_query($conn, $totalQuery);
 $totalRow = mysqli_fetch_assoc($totalResult);
 $total = $totalRow['total'] ?? 0;
 
 // Pending concerns
-$pendingQuery = "SELECT COUNT(*) AS pending FROM Concerns WHERE Status = 'Pending'";
+$pendingQuery = "SELECT COUNT(*) AS pending FROM concerns WHERE Status = 'Pending'";
 $pendingResult = mysqli_query($conn, $pendingQuery);
 $pendingRow = mysqli_fetch_assoc($pendingResult);
 $pending = $pendingRow['pending'] ?? 0;
 
 // In Progress concerns
-$inProgressQuery = "SELECT COUNT(*) AS inProgress FROM Concerns WHERE Status = 'In Progress'";
+$inProgressQuery = "SELECT COUNT(*) AS inProgress FROM concerns WHERE Status = 'In Progress'";
 $inProgressResult = mysqli_query($conn, $inProgressQuery);
 $inProgressRow = mysqli_fetch_assoc($inProgressResult);
 $inProgress = $inProgressRow['inProgress'] ?? 0;
@@ -38,8 +38,8 @@ $recentConcernsQuery = "
         c.Concern_Date,
         c.Status, 
         a.Name AS ReportedBy
-    FROM Concerns c
-    LEFT JOIN Accounts a ON c.AccountID = a.AccountID
+    FROM concerns c
+    LEFT JOIN accounts a ON c.AccountID = a.AccountID
     WHERE c.Status NOT IN ('Completed', 'Cancelled')
     ORDER BY c.ConcernID ASC
     LIMIT 3

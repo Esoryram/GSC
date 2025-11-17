@@ -17,7 +17,7 @@ $name = $_SESSION['name'] ?? $username;
 $activePage = "concerns";
 
 // Fetch the AccountID of the logged-in user
-$stmtUser = $conn->prepare("SELECT AccountID FROM Accounts WHERE Username = ?");
+$stmtUser = $conn->prepare("SELECT AccountID FROM accounts WHERE Username = ?");
 $stmtUser->bind_param("s", $username);
 $stmtUser->execute();
 $userRow = $stmtUser->get_result()->fetch_assoc();
@@ -29,7 +29,7 @@ $openConcernId = isset($_GET['open_concern']) ? intval($_GET['open_concern']) : 
 
 // Verify the concern belongs to the current user
 if ($openConcernId) {
-    $stmt = $conn->prepare("SELECT ConcernID FROM Concerns WHERE ConcernID = ? AND AccountID = ?");
+    $stmt = $conn->prepare("SELECT ConcernID FROM concerns WHERE ConcernID = ? AND AccountID = ?");
     $stmt->bind_param("ii", $openConcernId, $accountID);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -46,7 +46,7 @@ $stmt = $conn->prepare(
     "SELECT c.ConcernID, c.Concern_Title, c.Description, c.building_name, c.Room, 
             c.Service_type, c.EFname, c.Attachment, c.Concern_Date, 
             c.Assigned_to, c.Status 
-     FROM Concerns c 
+     FROM concerns c 
      WHERE c.AccountID = ? 
      AND c.Status NOT IN ('Completed', 'Cancelled') 
      ORDER BY c.Concern_Date DESC"
@@ -643,7 +643,7 @@ $stmt->close();
                     };
                     $date = date("l, d M Y", strtotime($row['Concern_Date']));
                     ?>
-                    <!-- Add ID to each accordion item for anchor targeting -->
+                  
                     <div class="accordion-item" id="concern-<?= $row['ConcernID'] ?>">
                         <h2 class="accordion-header">
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
@@ -658,19 +658,19 @@ $stmt->close();
                         </h2>
                         <div id="concern<?= $index ?>" class="accordion-collapse collapse" data-bs-parent="#concernsAccordion">
                             <div class="accordion-body">
-                                <!-- Concern Title -->
+                                
                                 <div class="form-field">
                                     <label>Concern Title</label>
                                     <div class="form-control"><?= htmlspecialchars($row['Concern_Title']) ?></div>
                                 </div>
                                 
-                                <!-- Description -->
+                                
                                 <div class="form-field">
                                     <label>Description</label>
                                     <div class="form-control"><?= htmlspecialchars($row['Description']) ?></div>
                                 </div>
 
-                                <!-- Room and Building in same row -->
+                                
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-field">
@@ -682,14 +682,14 @@ $stmt->close();
                                         <div class="form-field">
                                             <label>Building</label>
                                             <div class="form-control">
-                                                <!-- FIXED: Use building_name from database -->
+                                                
                                                 <?= !empty($row['building_name']) ? htmlspecialchars($row['building_name']) : 'Not specified' ?>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Service Type and Equipment/Facility in same row -->
+                               
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-field">
@@ -707,13 +707,13 @@ $stmt->close();
                                     </div>
                                 </div>
 
-                                <!-- Assigned To -->
+                               
                                 <div class="form-field">
                                     <label>Assigned To</label>
                                     <div class="form-control"><?= !empty($row['Assigned_to']) ? htmlspecialchars($row['Assigned_to']) : 'Not assigned yet' ?></div>
                                 </div>
                                 
-                                <!-- Attachment - Always show this field -->
+                           
                                 <div class="form-field">
                                     <label>Attachment</label>
                                     <div class="form-control">

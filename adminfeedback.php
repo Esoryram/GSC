@@ -76,8 +76,8 @@ $query = "
            c.Concern_Title, c.Description, c.Room, c.Service_type,
            a.Username, a.Name
     FROM Feedbacks f
-    JOIN Concerns c ON f.ConcernID = c.ConcernID
-    JOIN Accounts a ON f.AccountID = a.AccountID
+    JOIN concerns c ON f.ConcernID = c.ConcernID
+    JOIN accounts a ON f.AccountID = a.AccountID
     ORDER BY f.Date_Submitted DESC
 ";
 $result = $conn->query($query);

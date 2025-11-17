@@ -41,7 +41,7 @@ if (!$concern_id || !$assigned_to || !$status) {
 
 try {
     // Update concern in database
-    $stmt = $conn->prepare("UPDATE Concerns SET Assigned_to = ?, Status = ?, building_name = ?, Room = ?, Service_type = ?, EFname = ? WHERE ConcernID = ?");
+    $stmt = $conn->prepare("UPDATE concerns SET Assigned_to = ?, Status = ?, building_name = ?, Room = ?, Service_type = ?, EFname = ? WHERE ConcernID = ?");
     
     if (!$stmt) {
         throw new Exception('Database preparation failed: ' . $conn->error);

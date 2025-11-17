@@ -36,8 +36,8 @@ $query = "
         c.Description,
         c.EFname,
         c.Attachment
-    FROM Concerns c
-    LEFT JOIN Accounts a ON c.AccountID = a.AccountID
+    FROM concerns c
+    LEFT JOIN accounts a ON c.AccountID = a.AccountID
     LEFT JOIN rooms r ON c.Room = r.roomname
     WHERE c.Status NOT IN ('Completed', 'Cancelled')  -- ADDED: Exclude completed and cancelled concerns
     ORDER BY c.ConcernID ASC
