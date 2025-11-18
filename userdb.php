@@ -111,12 +111,17 @@ if ($accountID) {
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 
     <style>
-        body {
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
             font-family: 'Poppins', sans-serif;
-            font-weight: 600;
+        }
+
+        body {
             background: #f9fafb;
             overflow-x: hidden;
+            min-height: 100vh;
         }
 
         .navbar {
@@ -128,30 +133,38 @@ if ($accountID) {
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
             position: relative;
             width: 100%;
-            box-sizing: border-box;
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .logo img {
             height: 35px;
             width: auto;
             object-fit: contain;
-            margin-right: 10px;
         }
 
         .navbar .links {
             display: flex;
             gap: 10px;
             margin-right: auto;
+            margin-left: 20px;
         }
 
         .navbar .links a {
             color: white;
             text-decoration: none;
-            font-weight: bold;
+            font-weight: 600;
             font-size: 14px;
-            padding: 6px 10px;
+            padding: 8px 12px;
             border-radius: 5px;
             transition: 0.3s;
+            display: flex;
+            align-items: center;
+            min-height: 44px;
         }
 
         .navbar .links a.active {
@@ -169,11 +182,14 @@ if ($accountID) {
             background: transparent;
             border: 1px solid rgba(255,255,255,0.3);
             color: white;
-            padding: 8px 12px;
+            padding: 8px 10px;
             border-radius: 4px;
             font-size: 16px;
-            margin-left: 10px;
             cursor: pointer;
+            min-height: 44px;
+            width: 44px;
+            justify-content: center;
+            align-items: center;
         }
 
         .dropdown {
@@ -189,6 +205,8 @@ if ($accountID) {
             background: transparent;
             border: none;
             min-height: 44px;
+            display: flex;
+            align-items: center;
         }
 
         .dropdown-menu {
@@ -221,11 +239,14 @@ if ($accountID) {
         }
 
         .dropdown-menu a:hover {
-            background: #f1f1f1;
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .container {
             padding: 20px 15px;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
         .top-dashboard-grid {
@@ -316,8 +337,11 @@ if ($accountID) {
         }
 
         .cta-section {
-            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             margin: 20px 0;
+            width: 100%;
         }
 
         #submitConcernBtn {
@@ -329,10 +353,14 @@ if ($accountID) {
             color: white;
             border: none;
             text-decoration: none; 
-            display: inline-block; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
             transition: background 0.3s, transform 0.1s;
             box-shadow: 0 4px 10px rgba(31, 145, 88, 0.4);
             width: 300px;
+            min-height: 50px;
+            margin: 0 auto;
         }
 
         #submitConcernBtn:hover {
@@ -444,14 +472,22 @@ if ($accountID) {
             font-weight: bold;
         }
 
-        @media (max-width: 480px) {
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
             .navbar {
                 padding: 10px 12px;
                 flex-wrap: wrap;
             }
             
+            .navbar-left {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                flex: 1;
+            }
+            
             .navbar-toggler {
-                display: block;
+                display: flex;
                 order: 2;
             }
             
@@ -462,6 +498,7 @@ if ($accountID) {
                 gap: 8px;
                 margin-top: 10px;
                 order: 3;
+                margin-left: 0;
             }
             
             .navbar .links.show {
@@ -480,7 +517,6 @@ if ($accountID) {
             
             .logo {
                 order: 1;
-                margin-right: auto;
             }
             
             .dropdown {
@@ -489,15 +525,17 @@ if ($accountID) {
             }
             
             .container {
-                padding: 10px;
+                padding: 15px;
             }
             
             .top-dashboard-grid { 
                 grid-template-columns: 1fr; 
+                gap: 15px;
             } 
             
             .status-cards-wrapper { 
                 grid-template-columns: repeat(2, 1fr); 
+                gap: 12px;
             } 
             
             .dashboard-card {
@@ -531,9 +569,28 @@ if ($accountID) {
                 padding: 8px 10px;
                 font-size: 12px;
             }
+            
+            #submitConcernBtn {
+                width: 100%;
+                max-width: 300px;
+            }
         }
 
-        @media (max-width: 390px) {
+        @media (max-width: 480px) {
+            .navbar {
+                padding: 8px 10px;
+            }
+            
+            .navbar-left {
+                gap: 8px;
+            }
+            
+            .navbar-toggler {
+                padding: 6px 8px;
+                width: 40px;
+                min-height: 40px;
+            }
+            
             .navbar .links a {
                 font-size: 14px;
                 padding: 10px 12px;
@@ -544,12 +601,34 @@ if ($accountID) {
                 padding: 6px 10px;
             }
             
+            .container {
+                padding: 10px;
+            }
+            
             .status-cards-wrapper { 
                 grid-template-columns: 1fr; 
             } 
             
             .card-value {
                 font-size: 28px;
+            }
+            
+            .dashboard-card {
+                padding: 12px;
+                min-height: 90px;
+            }
+            
+            .recent-concerns-panel {
+                padding: 12px;
+            }
+            
+            .announcements-panel {
+                padding: 10px;
+            }
+            
+            .announcement-item {
+                padding: 8px 10px;
+                font-size: 11px;
             }
         }
 
@@ -594,14 +673,47 @@ if ($accountID) {
                 font-size: 12px;
             }
         }
+
+        /* Focus styles for accessibility */
+        .navbar .links a:focus,
+        .dropdown-toggle:focus,
+        #submitConcernBtn:focus,
+        .btn:focus,
+        .navbar-toggler:focus {
+            outline: 2px solid #087830;
+            outline-offset: 2px;
+        }
+
+        /* Reduced motion for users who prefer it */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms;
+                animation-iteration-count: 1;
+                transition-duration: 0.01ms;
+            }
+            
+            .dashboard-card {
+                transition: none;
+            }
+            
+            #submitConcernBtn {
+                transition: none;
+            }
+        }
     </style>
 </head>
 <body>
 
 <!-- Navbar -->
 <div class="navbar">
-    <div class="logo">
-        <img src="img/LSULogo.png" alt="LSU Logo">
+    <div class="navbar-left">
+        <div class="logo">
+            <img src="img/LSULogo.png" alt="LSU Logo">
+        </div>
+
+        <button class="navbar-toggler" type="button" id="navbarToggle" aria-label="Toggle navigation">
+            <i class="fas fa-bars"></i>
+        </button>
     </div>
 
     <div class="links" id="navbarLinks">
@@ -615,10 +727,6 @@ if ($accountID) {
             <i class="fas fa-list-ul me-1"></i> All Concerns
         </a>
     </div>
-
-    <button class="navbar-toggler" type="button" id="navbarToggle" aria-label="Toggle navigation">
-        <i class="fas fa-bars"></i>
-    </button>
 
     <div class="dropdown ms-auto">
         <button class="btn dropdown-toggle username-btn" aria-expanded="false" aria-haspopup="true">

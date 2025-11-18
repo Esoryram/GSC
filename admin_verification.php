@@ -397,9 +397,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['verify'])) {
         }
 
         @media (max-width: 480px) {
+            body {
+                padding: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
             .container {
-                max-width: 100%;
-                margin: 10px;
+                border-radius: 12px;
+                max-width: 350px;
+                max-height: 700px;
             }
             
             .verification-form {
@@ -407,7 +415,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['verify'])) {
             }
             
             .logo img {
-                max-width: 100px;
+                max-width: 125px;
             }
             
             header {

@@ -391,16 +391,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
 
         @media (max-width: 480px) {
-            .container {
-                max-width: 100%;
+            body {
+                padding: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
-            
+
+            .container {
+                border-radius: 12px;
+                max-width: 350px;
+                max-height: 700px;
+            }
+
             .login-form {
                 padding: 30px 25px;
             }
             
             .logo img {
-                max-width: 100px;
+                max-width: 125px;
             }
             
             header {

@@ -81,6 +81,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             font-weight: 400;
         }
 
+        html, body {
+            height: 100%;
+            width: 100%;
+        }
+
         body {
             background: linear-gradient(135deg, #087830 0%, #3c4142 100%);
             min-height: 100vh;
@@ -89,12 +94,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             align-items: center;
             padding: 20px;
             position: relative;
-            overflow: hidden;
+            overflow: auto;
         }
 
         body::before {
             content: "";
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
@@ -108,15 +113,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             z-index: -1;
         }
 
-        .logo img {
-            max-width: 120px;
-            height: auto;
-            display: block;
-            margin: 0 auto 15px auto;
-        }
-
         .floating-shapes {
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
@@ -187,6 +185,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             border-radius: 20px;
             box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
             overflow: hidden;
+            margin: auto;
             animation: fadeIn 0.8s ease-out;
         }
 
@@ -204,7 +203,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         header {
             background-color: #087830;
             color: white;
-            padding: 15px 40px 10px 40px;
+            padding: 25px 40px 20px 40px;
             text-align: center;
             position: relative;
         }
@@ -231,6 +230,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             background: rgba(255, 255, 255, 0.3);
         }
 
+        .logo img {
+            max-width: 120px;
+            height: auto;
+            display: block;
+            margin: 0 auto 15px auto;
+            width: 100%;
+        }
+
         .page-title {
             color: #AED14F;
             font-size: 1.8rem;
@@ -245,11 +252,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
 
         .login-form {
-            padding: 20px;
+            padding: 30px;
         }
 
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
         .form-group label {
@@ -302,7 +309,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         .login-btn {
             width: 100%;
-            padding: 12px;
+            padding: 15px;
             background: linear-gradient(135deg, #087830 0%, #4ec66a 100%);
             color: white;
             border: none;
@@ -312,11 +319,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             cursor: pointer;
             transition: all 0.3s ease;
             margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
         }
 
         .login-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(8, 120, 48, 0.3);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
         }
 
         .signup-link {
@@ -386,21 +401,152 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             font-size: 0.9rem;
         }
 
-        @media (max-width: 480px) {
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
             .container {
                 max-width: 100%;
+                border-radius: 15px;
             }
             
             .login-form {
-                padding: 30px 25px;
+                padding: 25px 20px;
+            }
+            
+            header {
+                padding: 20px 25px 15px 25px;
             }
             
             .logo img {
                 max-width: 100px;
             }
             
+            .page-title {
+                font-size: 1.6rem;
+            }
+            
+            .page-subtitle {
+                font-size: 0.95rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .container {
+                border-radius: 12px;
+                max-width:350px;
+            }
+            
             header {
-                padding: 20px 30px 15px 30px;
+                padding: 10px 15px 5px 15px;
+            }
+            
+            .logo img {
+                max-width: 125px;
+            }
+            
+            .login-form {
+                padding: 15px 10px;
+            }
+            
+            .page-title {
+                font-size: 1.0rem;
+            }
+            
+            .page-subtitle {
+                font-size: 0.9rem;
+            }
+            
+            .input-with-icon input {
+                padding: 9px 35px 9px 30px;
+            }
+            
+            .login-btn {
+                padding: 9px;
+                font-size: 1rem;
+            }
+            
+            footer {
+                padding: 12px;
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-height: 700px) {
+            body {
+                align-items: flex-start;
+                padding-top: 20px;
+                padding-bottom: 20px;
+            }
+        }
+
+        @media (max-height: 500px) {
+            body {
+                align-items: flex-start;
+            }
+            
+            .container {
+                max-width: 95%;
+            }
+            
+            header {
+                padding: 15px 20px 10px 20px;
+            }
+            
+            .login-form {
+                padding: 15px;
+            }
+            
+            .form-group {
+                margin-bottom: 15px;
+            }
+        }
+
+        /* Focus styles for accessibility */
+        .login-btn:focus,
+        .input-with-icon input:focus {
+            outline: 2px solid #087830;
+            outline-offset: 2px;
+        }
+
+        /* Reduced motion for users who prefer it */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms;
+                animation-iteration-count: 1;
+                transition-duration: 0.01ms;
+            }
+            
+            .container {
+                animation: none;
+            }
+            
+            .error-message,
+            .success-message {
+                animation: none;
+            }
+        }
+
+        /* Scrollable container for very small screens */
+        @media (max-width: 350px) {
+            body {
+                padding: 5px;
+            }
+            
+            .container {
+                max-width: 100%;
             }
         }
     </style>
@@ -545,6 +691,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             
             // Clear session form data
             <?php unset($_SESSION['form_data']); ?>
+            
+            // Ensure the body stays centered
+            function centerBody() {
+                const body = document.body;
+                const container = document.querySelector('.container');
+                
+                if (container.offsetHeight < window.innerHeight) {
+                    body.style.alignItems = 'center';
+                    body.style.justifyContent = 'center';
+                } else {
+                    body.style.alignItems = 'flex-start';
+                    body.style.justifyContent = 'flex-start';
+                }
+            }
+            
+            // Call on load and resize
+            centerBody();
+            window.addEventListener('resize', centerBody);
         });
     </script>
 </body>

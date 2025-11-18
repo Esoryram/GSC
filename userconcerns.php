@@ -73,12 +73,17 @@ $stmt->close();
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 
     <style>
-        body {
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
             font-family: 'Poppins', sans-serif;
-            font-weight: 600;
+        }
+
+        body {
             background: #f9fafb;
             overflow-x: hidden;
+            min-height: 100vh;
         }
 
         .navbar {
@@ -90,30 +95,38 @@ $stmt->close();
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
             position: relative;
             width: 100%;
-            box-sizing: border-box;
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .logo img {
             height: 35px;
             width: auto;
             object-fit: contain;
-            margin-right: 10px;
         }
 
         .navbar .links {
             display: flex;
             gap: 10px;
             margin-right: auto;
+            margin-left: 20px;
         }
 
         .navbar .links a {
             color: white;
             text-decoration: none;
-            font-weight: bold;
+            font-weight: 600;
             font-size: 14px;
-            padding: 6px 10px;
+            padding: 8px 12px;
             border-radius: 5px;
             transition: 0.3s;
+            display: flex;
+            align-items: center;
+            min-height: 44px;
         }
 
         .navbar .links a.active {
@@ -131,11 +144,14 @@ $stmt->close();
             background: transparent;
             border: 1px solid rgba(255,255,255,0.3);
             color: white;
-            padding: 8px 12px;
+            padding: 8px 10px;
             border-radius: 4px;
             font-size: 16px;
-            margin-left: 10px;
             cursor: pointer;
+            min-height: 44px;
+            width: 44px;
+            justify-content: center;
+            align-items: center;
         }
 
         .dropdown {
@@ -151,6 +167,8 @@ $stmt->close();
             background: transparent;
             border: none;
             min-height: 44px;
+            display: flex;
+            align-items: center;
         }
 
         .dropdown-menu {
@@ -164,7 +182,6 @@ $stmt->close();
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
             overflow: hidden;
             z-index: 1000;
-            border: none;
         }
 
         .dropdown:hover .dropdown-menu,
@@ -175,18 +192,16 @@ $stmt->close();
         .dropdown-menu a {
             display: block;
             padding: 12px 16px;
-            color: white; 
+            color: white;
             text-decoration: none;
             font-size: 14px;
             min-height: 44px;
             display: flex;
             align-items: center;
-            transition: background-color 0.3s;
         }
 
         .dropdown-menu a:hover {
-            background: #107040; 
-            color: white; 
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .concern-container {
@@ -195,10 +210,10 @@ $stmt->close();
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             width: 100%;
-            max-width: 1000px;
+            max-width: 850px;
             margin: 0 auto;
-            max-height: 70vh;
-            margin-top: 25px;
+            max-height: 625px;
+            margin-top: 15px;
             overflow-y: auto;
             box-sizing: border-box;
         }
@@ -421,14 +436,35 @@ $stmt->close();
             }
         }
 
-        @media (max-width: 480px) {
+        .concern-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .concern-container::-webkit-scrollbar-thumb {
+            background-color: #1f9158;
+            border-radius: 10px;
+        }
+
+        .concern-container::-webkit-scrollbar-track {
+            background-color: #f0f0f0;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
             .navbar {
                 padding: 10px 12px;
                 flex-wrap: wrap;
             }
             
+            .navbar-left {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                flex: 1;
+            }
+            
             .navbar-toggler {
-                display: block;
+                display: flex;
                 order: 2;
             }
             
@@ -439,6 +475,7 @@ $stmt->close();
                 gap: 8px;
                 margin-top: 10px;
                 order: 3;
+                margin-left: 0;
             }
             
             .navbar .links.show {
@@ -457,7 +494,6 @@ $stmt->close();
             
             .logo {
                 order: 1;
-                margin-right: auto;
             }
             
             .dropdown {
@@ -465,13 +501,11 @@ $stmt->close();
                 margin-left: auto;
             }
             
-            .main {
-                padding: 8px;
-            }
-            
             .concern-container {
-                padding: 12px;
-                max-height: 65vh;
+                padding: 10px;
+                max-height: 1000px;
+                max-width: 350px;
+                margin-top: 15px;
             }
             
             .concern-header {
@@ -527,7 +561,21 @@ $stmt->close();
             }
         }
 
-        @media (max-width: 390px) {
+        @media (max-width: 480px) {
+            .navbar {
+                padding: 8px 10px;
+            }
+            
+            .navbar-left {
+                gap: 8px;
+            }
+            
+            .navbar-toggler {
+                padding: 6px 8px;
+                width: 40px;
+                min-height: 40px;
+            }
+            
             .navbar .links a {
                 font-size: 14px;
                 padding: 10px 12px;
@@ -540,6 +588,9 @@ $stmt->close();
             
             .concern-container {
                 padding: 10px;
+                max-height: 1000px;
+                max-width: 350px;
+                margin-top: 15px;
             }
             
             .accordion-button {
@@ -563,8 +614,10 @@ $stmt->close();
             }
             
             .concern-container {
-                padding: 15px;
-                max-height: 60vh;
+                padding: 10px;
+                max-height: 1000px;
+                max-width: 350px;
+                margin-top: 15px;
             }
             
             .accordion-body .row {
@@ -572,17 +625,27 @@ $stmt->close();
             }
         }
 
-        .concern-container::-webkit-scrollbar {
-            width: 6px;
+        /* Focus styles for accessibility */
+        .navbar .links a:focus,
+        .dropdown-toggle:focus,
+        .attachment-btn:focus,
+        .btn:focus,
+        .navbar-toggler:focus {
+            outline: 2px solid #087830;
+            outline-offset: 2px;
         }
 
-        .concern-container::-webkit-scrollbar-thumb {
-            background-color: #1f9158;
-            border-radius: 10px;
-        }
-
-        .concern-container::-webkit-scrollbar-track {
-            background-color: #f0f0f0;
+        /* Reduced motion for users who prefer it */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms;
+                animation-iteration-count: 1;
+                transition-duration: 0.01ms;
+            }
+            
+            .accordion-item {
+                transition: none;
+            }
         }
     </style>
 </head>
@@ -590,8 +653,14 @@ $stmt->close();
 
 <!-- Navbar -->
 <div class="navbar">
-    <div class="logo">
-        <img src="img/LSULogo.png" alt="LSU Logo">
+    <div class="navbar-left">
+        <div class="logo">
+            <img src="img/LSULogo.png" alt="LSU Logo">
+        </div>
+
+        <button class="navbar-toggler" type="button" id="navbarToggle" aria-label="Toggle navigation">
+            <i class="fas fa-bars"></i>
+        </button>
     </div>
 
     <div class="links" id="navbarLinks">
@@ -605,10 +674,6 @@ $stmt->close();
             <i class="fas fa-list-ul me-1"></i> All Concerns
         </a>
     </div>
-
-    <button class="navbar-toggler" type="button" id="navbarToggle" aria-label="Toggle navigation">
-        <i class="fas fa-bars"></i>
-    </button>
 
     <div class="dropdown ms-auto">
         <button class="btn dropdown-toggle username-btn" aria-expanded="false" aria-haspopup="true">
@@ -628,149 +693,148 @@ $stmt->close();
     </div>
 </div>
 
-    <div class="concern-container">
-        <div class="concern-header">Your Submitted Concerns</div>
-        <div class="accordion" id="concernsAccordion">
-            <?php if ($concernsResult && $concernsResult->num_rows > 0): ?>
-                <?php $index = 1; ?>
-                <?php while ($row = $concernsResult->fetch_assoc()): ?>
-                    <?php
-                    $status = $row['Status'] ?? 'Unknown';
-                    $statusClass = match($status) {
-                        'In Progress' => 'status-in-progress',
-                        'Pending' => 'status-pending',
-                        default => 'bg-light text-dark'
-                    };
-                    $date = date("l, d M Y", strtotime($row['Concern_Date']));
-                    ?>
-                  
-                    <div class="accordion-item" id="concern-<?= $row['ConcernID'] ?>">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
-                                    data-bs-target="#concern<?= $index ?>" aria-expanded="false" 
-                                    aria-controls="concern<?= $index ?>">
-                                <span class="d-flex justify-content-between w-100 align-items-center flex-wrap">
-                                    <span class="me-2" style="font-size: 13px;"><?= $date ?></span>
-                                    <span class="me-2" style="font-size: 20px;"><?= htmlspecialchars($row['Concern_Title']) ?></span>
-                                    <span class="badge <?= $statusClass ?> status-badge"><?= htmlspecialchars($status) ?></span>
-                                </span>
-                            </button>
-                        </h2>
-                        <div id="concern<?= $index ?>" class="accordion-collapse collapse" data-bs-parent="#concernsAccordion">
-                            <div class="accordion-body">
-                                
-                                <div class="form-field">
-                                    <label>Concern Title</label>
-                                    <div class="form-control"><?= htmlspecialchars($row['Concern_Title']) ?></div>
-                                </div>
-                                
-                                
-                                <div class="form-field">
-                                    <label>Description</label>
-                                    <div class="form-control"><?= htmlspecialchars($row['Description']) ?></div>
-                                </div>
+<div class="concern-container">
+    <div class="concern-header">Your Submitted Concerns</div>
+    <div class="accordion" id="concernsAccordion">
+        <?php if ($concernsResult && $concernsResult->num_rows > 0): ?>
+            <?php $index = 1; ?>
+            <?php while ($row = $concernsResult->fetch_assoc()): ?>
+                <?php
+                $status = $row['Status'] ?? 'Unknown';
+                $statusClass = match($status) {
+                    'In Progress' => 'status-in-progress',
+                    'Pending' => 'status-pending',
+                    default => 'bg-light text-dark'
+                };
+                $date = date("l, d M Y", strtotime($row['Concern_Date']));
+                ?>
+              
+                <div class="accordion-item" id="concern-<?= $row['ConcernID'] ?>">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                data-bs-target="#concern<?= $index ?>" aria-expanded="false" 
+                                aria-controls="concern<?= $index ?>">
+                            <span class="d-flex justify-content-between w-100 align-items-center flex-wrap">
+                                <span class="me-2" style="font-size: 13px;"><?= $date ?></span>
+                                <span class="me-2" style="font-size: 20px;"><?= htmlspecialchars($row['Concern_Title']) ?></span>
+                                <span class="badge <?= $statusClass ?> status-badge"><?= htmlspecialchars($status) ?></span>
+                            </span>
+                        </button>
+                    </h2>
+                    <div id="concern<?= $index ?>" class="accordion-collapse collapse" data-bs-parent="#concernsAccordion">
+                        <div class="accordion-body">
+                            
+                            <div class="form-field">
+                                <label>Concern Title</label>
+                                <div class="form-control"><?= htmlspecialchars($row['Concern_Title']) ?></div>
+                            </div>
+                            
+                            
+                            <div class="form-field">
+                                <label>Description</label>
+                                <div class="form-control"><?= htmlspecialchars($row['Description']) ?></div>
+                            </div>
 
-                                
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-field">
-                                            <label>Room</label>
-                                            <div class="form-control"><?= htmlspecialchars($row['Room']) ?></div>
-                                        </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-field">
+                                        <label>Room</label>
+                                        <div class="form-control"><?= htmlspecialchars($row['Room']) ?></div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <div class="form-field">
-                                            <label>Building</label>
-                                            <div class="form-control">
-                                                
-                                                <?= !empty($row['building_name']) ? htmlspecialchars($row['building_name']) : 'Not specified' ?>
-                                            </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-field">
+                                        <label>Building</label>
+                                        <div class="form-control">
+                                            
+                                            <?= !empty($row['building_name']) ? htmlspecialchars($row['building_name']) : 'Not specified' ?>
                                         </div>
                                     </div>
                                 </div>
+                            </div>
 
-                               
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-field">
-                                            <label>Service Type</label>
-                                            <div class="form-control"><?= htmlspecialchars($row['Service_type']) ?></div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-field">
-                                            <label>Equipment / Facility</label>
-                                            <div class="form-control">
-                                                <?= !empty($row['EFname']) ? htmlspecialchars($row['EFname']) : 'Not specified' ?>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                               
-                                <div class="form-field">
-                                    <label>Assigned To</label>
-                                    <div class="form-control"><?= !empty($row['Assigned_to']) ? htmlspecialchars($row['Assigned_to']) : 'Not assigned yet' ?></div>
-                                </div>
-                                
                            
-                                <div class="form-field">
-                                    <label>Attachment</label>
-                                    <div class="form-control">
-                                        <?php if (!empty($row['Attachment'])): ?>
-                                            <?php 
-                                            $attachment = htmlspecialchars($row['Attachment']);
-                                            if (preg_match('/\.(jpg|jpeg|png|gif|bmp|webp)$/i', $attachment)): 
-                                            ?>
-                                                <button type="button" class="attachment-btn" 
-                                                        data-bs-toggle="modal" 
-                                                        data-bs-target="#attachmentModal"
-                                                        data-attachment-url="<?= $attachment ?>"
-                                                        data-attachment-type="image">
-                                                    <i class="fas fa-image me-1"></i>View Attachment
-                                                </button>
-                                            <?php else: ?>
-                                                <button type="button" class="attachment-btn" 
-                                                        data-bs-toggle="modal" 
-                                                        data-bs-target="#attachmentModal"
-                                                        data-attachment-url="<?= $attachment ?>"
-                                                        data-attachment-type="file">
-                                                    <i class="fas fa-file me-1"></i>View Attachment
-                                                </button>
-                                            <?php endif; ?>
-                                        <?php else: ?>
-                                            <span class="no-attachment">No attachment</span>
-                                        <?php endif; ?>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-field">
+                                        <label>Service Type</label>
+                                        <div class="form-control"><?= htmlspecialchars($row['Service_type']) ?></div>
                                     </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-field">
+                                        <label>Equipment / Facility</label>
+                                        <div class="form-control">
+                                            <?= !empty($row['EFname']) ? htmlspecialchars($row['EFname']) : 'Not specified' ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                           
+                            <div class="form-field">
+                                <label>Assigned To</label>
+                                <div class="form-control"><?= !empty($row['Assigned_to']) ? htmlspecialchars($row['Assigned_to']) : 'Not assigned yet' ?></div>
+                            </div>
+                            
+                       
+                            <div class="form-field">
+                                <label>Attachment</label>
+                                <div class="form-control">
+                                    <?php if (!empty($row['Attachment'])): ?>
+                                        <?php 
+                                        $attachment = htmlspecialchars($row['Attachment']);
+                                        if (preg_match('/\.(jpg|jpeg|png|gif|bmp|webp)$/i', $attachment)): 
+                                        ?>
+                                            <button type="button" class="attachment-btn" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#attachmentModal"
+                                                    data-attachment-url="<?= $attachment ?>"
+                                                    data-attachment-type="image">
+                                                <i class="fas fa-image me-1"></i>View Attachment
+                                            </button>
+                                        <?php else: ?>
+                                            <button type="button" class="attachment-btn" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#attachmentModal"
+                                                    data-attachment-url="<?= $attachment ?>"
+                                                    data-attachment-type="file">
+                                                <i class="fas fa-file me-1"></i>View Attachment
+                                            </button>
+                                        <?php endif; ?>
+                                    <?php else: ?>
+                                        <span class="no-attachment">No attachment</span>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <?php $index++; ?>
-                <?php endwhile; ?>
-            <?php else: ?>
-                <div class="alert alert-info text-center">You have not submitted any concerns yet.</div>
-            <?php endif; ?>
-        </div>
+                </div>
+                <?php $index++; ?>
+            <?php endwhile; ?>
+        <?php else: ?>
+            <div class="alert alert-info text-center">You have not submitted any concerns yet.</div>
+        <?php endif; ?>
     </div>
+</div>
 
-    <!-- Attachment Modal -->
-    <div class="modal fade attachment-modal" id="attachmentModal" tabindex="-1" aria-labelledby="attachmentModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="attachmentModalLabel">Attachment Preview</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body" id="attachmentModalBody">
-                    <!-- Content will be loaded dynamically -->
-                </div>
-                <div class="modal-footer">
-                    <a href="#" id="downloadAttachment" class="download-btn" target="_blank">
-                        <i class="fas fa-download me-1"></i> Download
-                    </a>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
+<!-- Attachment Modal -->
+<div class="modal fade attachment-modal" id="attachmentModal" tabindex="-1" aria-labelledby="attachmentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="attachmentModalLabel">Attachment Preview</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="attachmentModalBody">
+                <!-- Content will be loaded dynamically -->
+            </div>
+            <div class="modal-footer">
+                <a href="#" id="downloadAttachment" class="download-btn" target="_blank">
+                    <i class="fas fa-download me-1"></i> Download
+                </a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -781,7 +845,7 @@ $stmt->close();
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 
 <script>
-    // FIXED: Better mobile menu toggle with touch support
+    // Mobile menu functionality
     document.addEventListener('DOMContentLoaded', function() {
         const navbarToggle = document.getElementById('navbarToggle');
         const navbarLinks = document.getElementById('navbarLinks');
@@ -801,7 +865,7 @@ $stmt->close();
             }
         });
 
-        // FIXED: Prevent body scroll when menu is open on mobile
+        // Prevent body scroll when menu is open on mobile
         navbarToggle.addEventListener('click', function() {
             if (navbarLinks.classList.contains('show')) {
                 document.body.style.overflow = 'hidden';

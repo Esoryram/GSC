@@ -19,7 +19,7 @@ $filterDateTo     = isset($_GET['date_to']) ? mysqli_real_escape_string($conn, $
 $generateClicked  = isset($_GET['generate']); // Check if Generate button was clicked
 
 // Fetch unique room numbers for the dropdown
-$roomsQuery  = "SELECT DISTINCT Room FROM Concerns WHERE Room IS NOT NULL AND Room != '' ORDER BY Room ASC";
+$roomsQuery  = "SELECT DISTINCT Room FROM concerns WHERE Room IS NOT NULL AND Room != '' ORDER BY Room ASC";
 $roomsResult = mysqli_query($conn, $roomsQuery);
 $roomOptions = [];
 

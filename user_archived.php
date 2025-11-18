@@ -75,19 +75,24 @@ $stmt2->close();
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, shrink-to-fit=no">
 <title>Archived Concerns</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 /* General Styles */
-body {
+* {
     margin: 0;
+    padding: 0;
+    box-sizing: border-box;
     font-family: 'Poppins', sans-serif;
-    font-weight: 600;
+}
+
+body {
     background: #f9fafb;
     overflow-x: hidden;
+    min-height: 100vh;
 }
 
 /* Navbar */
@@ -100,13 +105,12 @@ body {
     box-shadow: 0 4px 6px rgba(0,0,0,0.3);
     position: relative;
     width: 100%;
-    box-sizing: border-box;
 }
 
-.logo {
+.navbar-left {
     display: flex;
     align-items: center;
-    margin-right: 15px; 
+    gap: 10px;
 }
 
 .logo img {
@@ -116,42 +120,51 @@ body {
 }
 
 .navbar h2 {
-    margin-left: 50px;
     font-size: 24px;
-    margin-top: 2px;
+    margin: 0;
 }
 
 .return-btn {
     background: #107040;
     color: white;
-    padding: 6px 12px;
+    padding: 8px 16px;
     border: none;
     border-radius: 6px;
     cursor: pointer;
-    font-weight: bold;
+    font-weight: 600;
     text-decoration: none;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
     transition: background 0.3s;
     font-size: 14px;
+    min-height: 44px;
     margin-left: auto;
 }
+
 .return-btn:hover {
     background: #07532e;
     color: white;
 }
 
+/* Container */
+.container {
+    padding: 20px 15px;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
 /* Concern Container */
 .concern-container {
     background: white;
+    padding: 25px;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    padding: 25px;
-    margin: 0 auto 30px;
-    margin-top: 25px;
-    max-width: 850px;
     width: 100%;
-    box-sizing: border-box;
-    max-height: 70vh;
+    max-width: 850px;
+    margin: 0 auto;
+    max-height: 625px;
+    margin-top: 15px;
     overflow-y: auto;
 }
 
@@ -254,6 +267,10 @@ body {
     transition: all 0.3s ease;
     white-space: nowrap;
     min-width: 180px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .feedback-btn:hover {
@@ -338,6 +355,7 @@ body {
     gap: 8px;
     text-decoration: none;
     font-size: 14px;
+    min-height: 44px;
 }
 
 .attachment-btn:hover {
@@ -431,6 +449,7 @@ body {
     gap: 8px;
     transition: background-color 0.3s;
     font-weight: 500;
+    min-height: 44px;
 }
 
 .download-btn:hover {
@@ -469,26 +488,45 @@ body {
     background-color: #f0f0f0;
 }
 
-/* Mobile Responsive */
+/* Focus styles for accessibility */
+.return-btn:focus,
+.feedback-btn:focus,
+.attachment-btn:focus,
+.download-btn:focus,
+.btn:focus {
+    outline: 2px solid #087830;
+    outline-offset: 2px;
+}
+
+/* Responsive adjustments - Made consistent with provided media queries */
 @media (max-width: 768px) {
     .navbar {
-        padding: 12px 15px;
+        padding: 10px 12px;
         flex-wrap: wrap;
     }
-
-    .logo {
-        margin-right: 10px;
+    
+    .navbar-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex: 1;
     }
     
     .navbar h2 {
-        font-size: 16px;
-        margin-left: 20px;
-        margin-top: 10px;
+        font-size: 18px;
+        margin-left: 10px;
     }
     
     .return-btn {
-        padding: 5px 10px;
+        order: 2;
+        margin-left: auto;
         font-size: 13px;
+        padding: 6px 12px;
+        min-height: 40px;
+    }
+    
+    .container {
+        padding: 15px;
     }
     
     .concern-container {
@@ -510,6 +548,9 @@ body {
     .feedback-btn {
         width: 100%;
         margin-top: 10px;
+        font-size: 13px;
+        padding: 8px 16px;
+        min-height: 40px;
     }
 
     .image-modal .modal-dialog {
@@ -521,34 +562,49 @@ body {
         min-height: 300px;
         max-height: 60vh;
     }
-}
-
-@media (max-width: 576px) {
-    .navbar {
+    
+    .form-field .form-control {
+        font-size: 14px;
         padding: 10px 12px;
     }
+}
+
+@media (max-width: 480px) {
+    .navbar {
+        padding: 8px 10px;
+    }
     
-    .logo img {
-        height: 35px;
+    .navbar-left {
+        gap: 8px;
     }
     
     .navbar h2 {
-        font-size: 15px;
-        margin-left: 10px;
+        font-size: 16px;
+        margin-left: 5px;
     }
     
     .return-btn {
-        padding: 4px 8px;
+        padding: 5px 10px;
         font-size: 12px;
+        min-height: 35px;
     }
     
+    .container {
+        padding: 10px;
+    }
+
     .concern-container {
-        padding: 15px;
+        padding: 10px;
+        max-height: 1000px;
+        max-width: 350px;
+        margin-top: 15px;
     }
-    
+            
     .accordion-button {
         padding: 10px;
-        font-size: 12px;
+        font-size: 10px;
+        min-height: 50px;
+        
     }
     
     .accordion-body {
@@ -574,11 +630,13 @@ body {
     }
     
     .form-field .form-control {
-        font-size: 16px;
+        font-size: 12px;
+        min-height: 30px;
+        padding: 6px 8px;
     }
     
     .status-badge {
-        font-size: 11px;
+        font-size: 8px;
         padding: 5px 10px;
     }
 
@@ -586,37 +644,79 @@ body {
         width: 100%;
         justify-content: center;
         margin-top: 8px;
+        font-size: 13px;
+        padding: 6px 12px;
+        min-height: 40px;
+    }
+    
+    .feedback-btn {
+        font-size: 10px;
+        padding: 6px 12px;
+        min-height: 38px;
     }
 }
 
-@media (max-width: 400px) {
+@media (min-width: 481px) and (max-width: 768px) {
     .navbar {
-        flex-direction: column;
-        gap: 10px;
-        text-align: center;
-    }
-    
-    .logo {
-        justify-content: center;
-        margin-right: 0;
+        padding: 12px 15px;
     }
     
     .navbar h2 {
-        margin-left: 0;
-    }
-    
-    .return-btn {
-        width: auto;
-        margin-left: 0;
+        font-size: 20px;
     }
     
     .concern-container {
+        padding: 20px;
+    }
+    
+    .accordion-button {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 576px) {
+    .concern-container {
         padding: 12px;
+        margin: 10px;
     }
     
     .concern-header {
         font-size: 15px;
         padding: 10px;
+    }
+    
+    .navbar h2 {
+        font-size: 15px;
+    }
+    
+    .return-btn {
+        font-size: 12px;
+        padding: 4px 8px;
+    }
+    
+    .feedback-btn {
+        font-size: 12px;
+    }
+}
+
+/* Reduced motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms;
+        animation-iteration-count: 1;
+        transition-duration: 0.01ms;
+    }
+    
+    .accordion-item {
+        transition: none;
+    }
+    
+    .feedback-btn {
+        transition: none;
+    }
+    
+    .attachment-btn {
+        transition: none;
     }
 }
 </style>
@@ -625,8 +725,10 @@ body {
 
 <!-- Navbar -->
 <div class="navbar">
-    <div class="logo">
-        <img src="img/LSULogo.png" alt="LSU Logo">
+    <div class="navbar-left">
+        <div class="logo">
+            <img src="img/LSULogo.png" alt="LSU Logo">
+        </div>
         <h2>Archived Concerns</h2>
     </div>
 
@@ -847,7 +949,7 @@ body {
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-success w-100">
+                    <button type="submit" class="btn btn-success w-100" style="min-height: 44px;">
                         <i class="fas fa-paper-plane me-1"></i> Submit Feedback
                     </button>
                 </div>

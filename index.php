@@ -20,20 +20,25 @@ include("config.php");
             font-weight: 400;
         }
 
+        html, body {
+            height: 100%;
+            width: 100%;
+        }
+
         body {
             background: linear-gradient(135deg, #087830 0%, #3c4142 100%);
-            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
             position: relative;
-            overflow: hidden;
+            overflow: auto;
+            min-height: 100vh;
         }
 
         body::before {
             content: "";
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
@@ -53,13 +58,15 @@ include("config.php");
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            margin: auto;
         }
 
         header {
             background-color: #087830;
             color: white;
-            padding: 30px 40px;
+            padding: 25px 30px;
             text-align: center;
+            flex-shrink: 0;
         }
 
         header img {
@@ -67,19 +74,23 @@ include("config.php");
             height: auto;
             display: block;
             margin: 0 auto;
+            width: 100%;
         }
 
         .login-options {
             display: flex;
             flex-wrap: wrap;
-            padding: 40px;
-            gap: 30px;
+            padding: 30px;
+            gap: 25px;
             justify-content: center;
+            overflow: visible;
+            flex-grow: 1;
         }
 
         .option-card {
             flex: 1;
-            min-width: 300px;
+            min-width: 280px;
+            max-width: 400px;
             background: white;
             border-radius: 15px;
             overflow: hidden;
@@ -90,14 +101,15 @@ include("config.php");
         }
 
         .option-card:hover {
-            transform: translateY(-10px);
+            transform: translateY(-5px);
             box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
         }
 
         .card-header {
-            padding: 25px;
+            padding: 25px 20px;
             text-align: center;
             color: white;
+            flex-shrink: 0;
         }
 
         .admin .card-header,
@@ -106,23 +118,24 @@ include("config.php");
         }
 
         .card-icon {
-            font-size: 3.5rem;
+            font-size: 3rem;
             margin-bottom: 15px;
         }
 
         .card-title {
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             font-weight: 600;
             margin-bottom: 10px;
         }
 
         .card-description {
-            font-size: 1rem;
+            font-size: 0.95rem;
             opacity: 0.9;
+            line-height: 1.4;
         }
 
         .card-content {
-            padding: 30px;
+            padding: 25px 20px;
             flex-grow: 1;
             display: flex;
             flex-direction: column;
@@ -133,13 +146,13 @@ include("config.php");
         .login-btn {
             display: block;
             width: 100%;
-            padding: 15px;
+            padding: 14px;
             border: none;
             border-radius: 8px;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.3s ease;
+            transition: background 0.3s ease, transform 0.2s ease;
             text-align: center;
             text-decoration: none;
         }
@@ -153,32 +166,183 @@ include("config.php");
         .admin .login-btn:hover,
         .user .login-btn:hover {
             background: #087830;
+            transform: scale(1.02);
+        }
+
+        .login-btn:active {
+            transform: scale(0.98);
         }
 
         footer {
             background-color: #3c4142;
             color: white;
             text-align: center;
-            padding: 20px;
-            font-size: 0.9rem;
+            padding: 18px;
+            font-size: 0.85rem;
+            flex-shrink: 0;
         }
 
         @media (max-width: 768px) {
+            body {
+                padding: 15px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .container {
+                border-radius: 15px;
+            }
+            
             .login-options {
                 flex-direction: column;
-                padding: 30px 20px;
+                padding: 25px 20px;
+                gap: 20px;
             }
             
             .option-card {
                 min-width: 100%;
+                max-width: 100%;
             }
             
             header {
-                padding: 20px 30px;
+                padding: 20px 25px;
             }
             
             header img {
                 max-width: 200px;
+            }
+            
+            .card-header {
+                padding: 20px 15px;
+            }
+            
+            .card-content {
+                padding: 20px 15px;
+            }
+            
+            .card-icon {
+                font-size: 2.8rem;
+            }
+            
+            .card-title {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .container {
+                border-radius: 12px;
+                max-width: 350px;
+                max-height: 700px;
+            }
+            
+            header {
+                padding: 15px 20px;
+            }
+            
+            header img {
+                max-width: 125px;
+            }
+            
+            .login-options {
+                padding: 20px 15px;
+                gap: 15px;
+            }
+            
+            .card-header {
+                padding: 12px 9px;
+            }
+            
+            .card-content {
+                padding: 12px 9px;
+            }
+            
+            .card-icon {
+                font-size: 2.0rem;
+            }
+            
+            .card-title {
+                font-size: 1.0rem;
+            }
+            
+            .login-btn {
+                padding: 10px;
+                font-size: 0.95rem;
+            }
+            
+            footer {
+                padding: 12px;
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-height: 700px) {
+            body {
+                align-items: flex-start;
+                padding-top: 20px;
+                padding-bottom: 20px;
+            }
+        }
+
+        @media (max-height: 500px) {
+            body {
+                align-items: flex-start;
+            }
+            
+            .container {
+                max-width: 95%;
+            }
+            
+            header {
+                padding: 10px 15px;
+            }
+            
+            .login-options {
+                padding: 15px;
+                gap: 10px;
+            }
+            
+            .card-header {
+                padding: 12px 10px;
+            }
+            
+            .card-content {
+                padding: 12px 10px;
+            }
+        }
+
+        .login-btn:focus {
+            outline: 2px solid #087830;
+            outline-offset: 2px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms;
+                animation-iteration-count: 1;
+                transition-duration: 0.01ms;
+            }
+            
+            .option-card:hover {
+                transform: none;
+            }
+        }
+
+        @media (max-width: 350px) {
+            body {
+                padding: 5px;
+            }
+            
+            .container {
+                max-width: 100%;
             }
         }
     </style>
@@ -186,7 +350,7 @@ include("config.php");
 <body>
     <div class="container">
         <header>
-            <img src="img/LSULogo.png" alt="LSU Logo">
+            <img src="img/LSULogo.png" alt="La Salle University Logo">
         </header>        
         <div class="login-options">
             <div class="option-card admin">
@@ -195,10 +359,10 @@ include("config.php");
                         <i class="fas fa-user-shield"></i>
                     </div>
                     <h2 class="card-title">Administrator</h2>
-                    <p class="card-description">Access administrative functions</p>
+                    <p class="card-description">Access administrative functions and system management</p>
                 </div>
                 <div class="card-content">
-                    <a href="admin_login.php" class="login-btn">
+                    <a href="admin_login.php" class="login-btn" aria-label="Login as Administrator">
                         <i class="fas fa-sign-in-alt"></i> Login as Administrator
                     </a>
                 </div>
@@ -210,10 +374,10 @@ include("config.php");
                         <i class="fas fa-user-graduate"></i>
                     </div>
                     <h2 class="card-title">User</h2>
-                    <p class="card-description">Access student/staff account</p>
+                    <p class="card-description">Access student and staff accounts and resources</p>
                 </div>
                 <div class="card-content">
-                    <a href="user_login.php" class="login-btn">
+                    <a href="user_login.php" class="login-btn" aria-label="Login as User">
                         <i class="fas fa-sign-in-alt"></i> Login as User
                     </a>
                 </div>
@@ -226,7 +390,7 @@ include("config.php");
     </div>
 
     <script>
-        // Simple animation for the cards on page load
+        // Enhanced animation for the cards on page load
         document.addEventListener('DOMContentLoaded', function() {
             const cards = document.querySelectorAll('.option-card');
             
@@ -240,6 +404,24 @@ include("config.php");
                     card.style.transform = 'translateY(0)';
                 }, index * 200);
             });
+            
+            // Ensure the body stays centered
+            function centerBody() {
+                const body = document.body;
+                const container = document.querySelector('.container');
+                
+                if (container.offsetHeight < window.innerHeight) {
+                    body.style.alignItems = 'center';
+                    body.style.justifyContent = 'center';
+                } else {
+                    body.style.alignItems = 'flex-start';
+                    body.style.justifyContent = 'flex-start';
+                }
+            }
+            
+            // Call on load and resize
+            centerBody();
+            window.addEventListener('resize', centerBody);
         });
     </script>
 </body>
